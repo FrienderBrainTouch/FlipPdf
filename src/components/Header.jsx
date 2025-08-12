@@ -1,11 +1,22 @@
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 
 function Header() {
+  const location = useLocation();
+  
+  // 현재 경로에 따라 선택된 책 결정
+  const selectedBook = location.pathname === '/vq' ? 'vq' : 'friender';
+
   // PDF 다운로드 함수
   const handleDownloadPDF = () => {
     const link = document.createElement('a');
-    link.href = '/func-file/FrienderFile/프랜더-소개-책자.pdf';
-    link.download = '프랜더-소개-책자.pdf';
+    if (selectedBook === 'friender') {
+      link.href = '/func-file/FrienderFile/프랜더-소개-책자.pdf';
+      link.download = '프랜더-소개-책자.pdf';
+    } else {
+      link.href = '/func-file/VQFile/(주)브이큐스튜디오_소개 카달로그.pdf';
+      link.download = '(주)브이큐스튜디오_소개 카달로그.pdf';
+    }
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -14,7 +25,9 @@ function Header() {
   // PDF 프린트 함수
   const handlePrint = () => {
     // PDF 파일 경로
-    const pdfUrl = '/func-file/FrienderFile/프랜더-소개-책자.pdf';
+    const pdfUrl = selectedBook === 'friender' 
+      ? '/func-file/FrienderFile/프랜더-소개-책자.pdf'
+      : '/func-file/VQFile/(주)브이큐스튜디오_소개 카달로그.pdf';
     
     // 1단계: PDF를 새 창에서 열기
     const pdfWindow = window.open(pdfUrl, '_blank');
@@ -50,6 +63,7 @@ function Header() {
 
   return (
     <header className="w-full py-4 px-6 flex justify-center items-center">
+      {/* 기능 버튼들 */}
       <div className="flex gap-3">
         <button
           onClick={handlePrint}

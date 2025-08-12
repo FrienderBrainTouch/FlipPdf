@@ -6,23 +6,60 @@ function Book() {
   const [isCoverVisible, setIsCoverVisible] = useState(false);
   const [isMainImageAnimating, setIsMainImageAnimating] = useState(false);
   const [mainImageSize, setMainImageSize] = useState(1);
+  const [mainImageRotation, setMainImageRotation] = useState(0);
+  const [mainImageOpacity, setMainImageOpacity] = useState(0);
+  const [titleOpacity, setTitleOpacity] = useState(0);
+  const [subtitleOpacity, setSubtitleOpacity] = useState(0);
+  const [backgroundScale, setBackgroundScale] = useState(1.2);
+  const [backgroundBlur, setBackgroundBlur] = useState(0);
   const [selectedGif, setSelectedGif] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalSourcePage, setModalSourcePage] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const animationRef = useRef(null);
+  const bookRef = useRef(null);
 
-  // main 이미지 애니메이션 함수
-  const animateMainImage = (startSize, endSize, duration) => {
+  // 화려한 표지 애니메이션 함수
+  const animateCover = (duration) => {
     const startTime = performance.now();
-    const sizeDiff = endSize - startSize;
     
     const animate = (currentTime) => {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       
-      // 일정한 선형 애니메이션 (ease-out 효과 제거)
-      const currentSize = startSize + (sizeDiff * progress);
+      // 배경 애니메이션 (0-30%)
+      if (progress <= 0.3) {
+        const bgProgress = progress / 0.3;
+        setBackgroundScale(1.2 - (0.2 * bgProgress));
+        setBackgroundBlur(5 * bgProgress);
+      }
       
-      setMainImageSize(currentSize);
+      // 메인 이미지 등장 애니메이션 (20-50%)
+      if (progress >= 0.2 && progress <= 0.5) {
+        const imgProgress = (progress - 0.2) / 0.3;
+        setMainImageOpacity(imgProgress);
+        setMainImageRotation(360 * imgProgress);
+        setMainImageSize(1 + (319 * imgProgress));
+      }
+      
+      // 메인 이미지 크기 조정 및 회전 정리 (50-80%)
+      if (progress >= 0.5 && progress <= 0.8) {
+        const sizeProgress = (progress - 0.5) / 0.3;
+        setMainImageSize(320 + (0 * sizeProgress)); // 크기 유지
+        setMainImageRotation(360 - (360 * sizeProgress)); // 360도에서 0도로 회전 정리
+      }
+      
+      // 타이틀과 서브타이틀 등장 (70-100%)
+      if (progress >= 0.7 && progress <= 1) {
+        const textProgress = (progress - 0.7) / 0.3;
+        setTitleOpacity(textProgress);
+        setSubtitleOpacity(textProgress);
+      }
+      
+      // 애니메이션 완료 시 회전을 0도로 직접 설정
+      if (progress >= 1) {
+        setMainImageRotation(0);
+      }
       
       if (progress < 1) {
         animationRef.current = requestAnimationFrame(animate);
@@ -38,15 +75,14 @@ function Book() {
     const timer = setTimeout(() => {
       setIsCoverVisible(true);
       
-      // 2초 후에 main 이미지 애니메이션 시작
-      const mainImageTimer = setTimeout(() => {
+      // 1초 후에 화려한 애니메이션 시작
+      const animationTimer = setTimeout(() => {
         setIsMainImageAnimating(true);
-        // 애니메이션 시작
-        const endSize = Math.min(window.innerWidth < 768 ? 320 : 320, 320); // 100px 작은 크기
-        animateMainImage(1, endSize, 1000);
-      }, 2000);
+        // 화려한 애니메이션 시작 (3초)
+        animateCover(3000);
+      }, 1000);
       
-      return () => clearTimeout(mainImageTimer);
+      return () => clearTimeout(animationTimer);
     }, 1000);
     
     return () => clearTimeout(timer);
@@ -59,6 +95,16 @@ function Book() {
         cancelAnimationFrame(animationRef.current);
       }
     };
+  }, []);
+
+  // 윈도우 크기 변경 감지
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
     const frienderData = [
@@ -109,10 +155,254 @@ function Book() {
     6: "/interacivefile/FrienderFile/6-해양-오염-구조-탐사대-체험.gif"
   };
 
+  // section-img 이미지 매핑 (페이지별)
+  const sectionImgMapping = {
+    2: [
+      "/interacivefile/FrienderFile/section-img/2-1.png",
+      "/interacivefile/FrienderFile/section-img/2-2.png", 
+      "/interacivefile/FrienderFile/section-img/2-3.png"
+    ],
+    3: [
+      "/interacivefile/FrienderFile/section-img/3-1.png",
+      "/interacivefile/FrienderFile/section-img/3-2.png",
+      "/interacivefile/FrienderFile/section-img/3-3.png"
+    ],
+    4: [
+      "/interacivefile/FrienderFile/section-img/4-1.png",
+      "/interacivefile/FrienderFile/section-img/4-2.png",
+      "/interacivefile/FrienderFile/section-img/4-3.png",
+      "/interacivefile/FrienderFile/section-img/4-4.png"
+    ],
+    5: [
+      "/interacivefile/FrienderFile/section-img/5-1.png",
+      "/interacivefile/FrienderFile/section-img/5-2.png",
+      "/interacivefile/FrienderFile/section-img/5-3.png"
+    ],
+    6: [
+      "/interacivefile/FrienderFile/section-img/6-1.png",
+      "/interacivefile/FrienderFile/section-img/6-2.png",
+      "/interacivefile/FrienderFile/section-img/6-3.png",
+      "/interacivefile/FrienderFile/section-img/6-4.png"
+    ],
+    7: [
+      "/interacivefile/FrienderFile/section-img/7-1.png",
+      "/interacivefile/FrienderFile/section-img/7-2.png",
+      "/interacivefile/FrienderFile/section-img/7-3.png",
+      "/interacivefile/FrienderFile/section-img/7-4.png"
+    ],
+    8: [
+      "/interacivefile/FrienderFile/section-img/8-1.png"
+    ]
+  };
+
+  // 페이지별 개별 이미지 위치 설정
+  const individualImagePositions = {
+    2: [
+      {
+        // 2-1번 이미지 - 상단
+        position: 'absolute',
+        top: '3%',
+        left: '5%',
+        width: '100%',
+        maxWidth: '345px'
+      },
+      {
+        // 2-2번 이미지 - 중단
+        position: 'absolute',
+        top: '25%',
+        left: '3%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 2-3번 이미지 - 하단
+        position: 'absolute',
+        bottom: '0%',
+        right: '0%',
+        width: '100%',
+        maxWidth: '355px'
+      }
+    ],
+    3: [
+      {
+        // 3-1번 이미지 - 상단 왼쪽
+        position: 'absolute',
+        top: '7%',
+        left: '2%',
+        width: '100%',
+        maxWidth: '353px'
+      },
+      {
+        // 3-2번 이미지 - 상단 오른쪽
+        position: 'absolute',
+        top: '38%',
+        right: '2%',
+        width: '100%',
+        maxWidth: '354px'
+      },
+      {
+        // 3-3번 이미지 - 하단 중앙
+        position: 'absolute',
+        bottom: '0%',
+        left: '3%',
+        width: '100%',
+        maxWidth: '351px'
+      }
+    ],
+    4: [
+      {
+        // 4-1번 이미지 - 상단 왼쪽
+        position: 'absolute',
+        top: '0%',
+        left: '7%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 4-2번 이미지 - 상단 오른쪽
+        position: 'absolute',
+        top: '22%',
+        right: '2%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 4-3번 이미지 - 하단 왼쪽
+        position: 'absolute',
+        bottom: '39%',
+        left: '7%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 4-4번 이미지 - 하단 오른쪽
+        position: 'absolute',
+        bottom: '3%',
+        right: '0%',
+        width: '100%',
+        maxWidth: '340px'
+      }
+    ],
+    5: [
+      {
+        // 5-1번 이미지 - 상단
+        position: 'absolute',
+        top: '0%',
+        left: '0%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 5-2번 이미지 - 중단 왼쪽
+        position: 'absolute',
+        top: '33%',
+        left: '0%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 5-3번 이미지 - 중단 오른쪽
+        position: 'absolute',
+        bottom: '3%',
+        right: '10%',
+        width: '100%',
+        maxWidth: '340px'
+      }
+    ],
+    6: [
+      {
+        // 6-1번 이미지 - 상단 중앙
+        position: 'absolute',
+        top: '0%',
+        left: '9%',
+        width: '100%',
+        maxWidth: '305px'
+      },
+      {
+        // 6-2번 이미지 - 중단 왼쪽
+        position: 'absolute',
+        top: '12%',
+        left: '6%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 6-3번 이미지 - 중단 오른쪽
+        position: 'absolute',
+        bottom: '27%',
+        right: '0%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 6-4번 이미지 - 하단
+        position: 'absolute',
+        bottom: '3%',
+        left: '7%',
+        width: '100%',
+        maxWidth: '340px'
+      }
+    ],
+    7: [
+      {
+        // 7-1번 이미지 - 상단 왼쪽
+        position: 'absolute',
+        top: '0%',
+        left: '0%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 7-2번 이미지 - 상단 오른쪽
+        position: 'absolute',
+        top: '11%',
+        right: '8%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 7-3번 이미지 - 하단 왼쪽
+        position: 'absolute',
+        bottom: '39%',
+        left: '0%',
+        width: '100%',
+        maxWidth: '340px'
+      },
+      {
+        // 7-4번 이미지 - 하단 오른쪽
+        position: 'absolute',
+        bottom: '4%',
+        right: '7%',
+        width: '100%',
+        maxWidth: '340px'
+      }
+    ],
+    8: [
+      {
+        // 8-1번 이미지 - 중앙
+        position: 'absolute',
+        bottom: '1%',
+        left: '0%',
+        width: '100%',
+        maxWidth: '340px'
+      }
+    ]
+  };
+
   // gif 클릭 핸들러
   const handleGifClick = (gifNumber, event) => {
     event.stopPropagation(); // 이벤트 전파 방지
     setSelectedGif(gifMapping[gifNumber]);
+    // 4페이지(index === 2)의 environ 이미지들은 페이지 ID 4로 설정
+    setModalSourcePage(4);
+    setIsModalOpen(true);
+  };
+
+  // section-img 클릭 핸들러
+  const handleSectionImgClick = (imgSrc, event, pageId) => {
+    event.stopPropagation(); // 이벤트 전파 방지
+    setSelectedGif(imgSrc);
+    setModalSourcePage(parseInt(pageId));
     setIsModalOpen(true);
   };
 
@@ -120,14 +410,38 @@ function Book() {
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedGif(null);
+    
+    // 모달이 닫힐 때 해당 페이지로 이동
+    if (modalSourcePage !== null && bookRef.current) {
+      setTimeout(() => {
+        // 페이지 ID를 인덱스로 변환 (표지 페이지는 0, 나머지는 ID-1)
+        const pageIndex = modalSourcePage === 1 ? 0 : modalSourcePage - 1;
+        bookRef.current.pageFlip().flip(pageIndex);
+      }, 100);
+    }
+    setModalSourcePage(null);
   };
 
 
 
   // 해상도 확인하여 크기 지정
-  const isMobile = window.innerWidth < 768;
   const bookWidth = isMobile ? 320 : 370;
   const bookHeight = isMobile ? 450 : 500;
+
+  // 반응형 이미지 크기 계산 함수
+  const getResponsiveImageSize = (baseSize, isMobile) => {
+    return isMobile ? baseSize * 0.8 : baseSize;
+  };
+
+  // 반응형 이미지 위치 계산 함수
+  const getResponsiveImagePosition = (baseConfig, isMobile) => {
+    const scale = isMobile ? 0.9 : 1;
+    return {
+      ...baseConfig,
+      width: `${parseFloat(baseConfig.width) * scale}%`,
+      maxWidth: `${getResponsiveImageSize(parseInt(baseConfig.maxWidth), isMobile)}px`
+    };
+  };
 
   // 페이지 변경 감지
   const handlePageChange = (e) => {
@@ -138,17 +452,22 @@ function Book() {
     if (newPage === 0) {
       setTimeout(() => {
         setIsCoverVisible(true);
-        // 2초 후에 main 이미지 애니메이션 시작
+        // 1초 후에 화려한 애니메이션 시작
         setTimeout(() => {
           setIsMainImageAnimating(true);
-          const endSize = Math.min(window.innerWidth < 768 ? 320 : 320, 320);
-          animateMainImage(1, endSize, 1000);
-        }, 2000);
+          animateCover(3000);
+        }, 1000);
       }, 500);
     } else {
       setIsCoverVisible(false);
       setIsMainImageAnimating(false);
       setMainImageSize(1);
+      setMainImageRotation(0);
+      setMainImageOpacity(0);
+      setTitleOpacity(0);
+      setSubtitleOpacity(0);
+      setBackgroundScale(1.2);
+      setBackgroundBlur(0);
 
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
@@ -156,9 +475,11 @@ function Book() {
     }
   };
 
+
   return (
     <div className="w-full h-full flex justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
       <HTMLFlipBook 
+        ref={bookRef}
         width={bookWidth} 
         height={bookHeight}
         maxShadowOpacity={0.5}
@@ -168,6 +489,10 @@ function Book() {
         showPageCorners={false}
         size='fixed'
         onFlip={handlePageChange}
+        usePortrait={isMobile}
+        useMouseEvents={true}
+        swipeDistance={50}
+        disableFlipByClick={false}
       >
         {/* 표지 페이지 */}
         <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden">
@@ -177,6 +502,11 @@ function Book() {
               src="/Pdf-img/Friender/1.jpg"
               alt="Friender Cover Background" 
               className="w-full h-full object-cover"
+              style={{
+                transform: `scale(${backgroundScale})`,
+                filter: `blur(${backgroundBlur}px)`,
+                transition: 'transform 0.3s ease-out, filter 0.3s ease-out'
+              }}
             />
             
             {/* main 이미지 오버레이 - 중앙에 배치 */}
@@ -187,9 +517,10 @@ function Book() {
                 style={{
                   width: `${mainImageSize}px`,
                   height: `${mainImageSize}px`,
-                  opacity: isCoverVisible ? 1 : 0,
+                  opacity: mainImageOpacity,
+                  transform: `rotate(${mainImageRotation}deg)`,
                   objectFit: 'contain',
-                  transition: 'opacity 1s cubic-bezier(0.4, 0, 1, 1)'
+                  transition: 'transform 0.1s linear'
                 }}
               />
               
@@ -213,8 +544,9 @@ function Book() {
                     style={{
                       width: `${mainImageSize * 0.8}px`, // main 이미지보다 20% 작게
                       height: 'auto',
-                      opacity: isCoverVisible ? 1 : 0,
-                      transition: 'opacity 1s cubic-bezier(0.4, 0, 1, 1)'
+                      opacity: titleOpacity,
+                      transform: `translateY(${20 - (titleOpacity * 20)}px)`,
+                      transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
                     }}
                   />
                   
@@ -225,32 +557,54 @@ function Book() {
                     style={{
                       width: `${mainImageSize * 0.5}px`, // main 이미지의 50% 크기
                       height: 'auto',
-                      opacity: isCoverVisible ? 1 : 0,
-                      transition: 'opacity 1s cubic-bezier(0.4, 0, 1, 1)'
+                      opacity: subtitleOpacity,
+                      transform: `translateY(${20 - (subtitleOpacity * 20)}px)`,
+                      transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
                     }}
                   />
                 </div>
               )}
             </div>
-
-            {/* 기존 title과 subtitle 제거 */}
           </div>
         </div>
 
         {frienderData.map((page, index) => (
-          <div key={page.id} className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg">
+          <div 
+            key={page.id} 
+            className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative"
+          >
             <div className="w-full h-full flex flex-col justify-center items-center p-0">
               <div className="w-full h-full relative">
                 <img 
                   src={`/Pdf-img/Friender/${page.id}.jpg`}
                   alt={page.name} 
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover pointer-events-none"
                 />
                 
-                {/* 4페이지(index === 2)에만 이미지들을 추가 */}
+                                {/* 각 페이지별 section-img 이미지들을 개별적으로 배치 */}
+                {sectionImgMapping[page.id] && individualImagePositions[page.id] && (
+                  <>
+                    {sectionImgMapping[page.id].map((imgSrc, imgIndex) => (
+                      <div
+                        key={imgIndex}
+                        className="absolute cursor-pointer hover:scale-100 transition-all duration-200 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
+                        style={getResponsiveImagePosition(individualImagePositions[page.id][imgIndex], isMobile)}
+                        onClick={(e) => handleSectionImgClick(imgSrc, e, page.id)}
+                      >
+                        <img 
+                          src={imgSrc}
+                          alt={`Section ${page.id}-${imgIndex + 1}`}
+                          className="w-full h-full object-contain opacity-0"
+                        />
+                      </div>
+                    ))}
+                  </>
+                )}
+                
+                {/* 4페이지(index === 2)에만 기존 environ 이미지들도 추가로 배치 */}
                 {index === 2 && (
                   <div 
-                    className="absolute flex justify-between items-center"
+                    className="absolute flex justify-between items-center pointer-events-auto"
                     style={{
                       top: '13%',
                       left: '50%',
@@ -326,8 +680,14 @@ function Book() {
 
       {/* Gif 모달 */}
       {isModalOpen && selectedGif && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto relative">
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={closeModal}
+        >
+          <div 
+            className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* 닫기 버튼 */}
             <button
               onClick={closeModal}
