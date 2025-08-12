@@ -11,16 +11,45 @@ function Header() {
     document.body.removeChild(link);
   };
 
-  // 프린트 함수
+  // PDF 프린트 함수
   const handlePrint = () => {
-    window.open('/func-file/FrienderFile/프랜더-소개-책자.pdf', '_blank');
-    setTimeout(() => {
-      window.print();
-    }, 1000);
+    // PDF 파일 경로
+    const pdfUrl = '/func-file/FrienderFile/프랜더-소개-책자.pdf';
+    
+    // 1단계: PDF를 새 창에서 열기
+    const pdfWindow = window.open(pdfUrl, '_blank');
+    
+    // 2단계: PDF가 로드된 후 프린트 호출
+    if (pdfWindow) {
+      pdfWindow.onload = () => {
+        // PDF 페이지에서 프린트 다이얼로그 열기
+        pdfWindow.print();
+      };
+      
+      // PDF 로드 확인을 위한 폴링 (onload가 작동하지 않는 경우 대비)
+      const checkPdfLoaded = setInterval(() => {
+        try {
+          if (pdfWindow.document.readyState === 'complete') {
+            clearInterval(checkPdfLoaded);
+            pdfWindow.print();
+          }
+        } catch (error) {
+          // CORS 오류 등으로 인해 접근할 수 없는 경우
+          clearInterval(checkPdfLoaded);
+          // 대안: 사용자가 수동으로 프린트하도록 안내
+          alert('PDF가 열렸습니다. 브라우저의 프린트 버튼을 사용하여 프린트하세요.');
+        }
+      }, 100);
+      
+      // 10초 후 폴링 중단
+      setTimeout(() => {
+        clearInterval(checkPdfLoaded);
+      }, 10000);
+    }
   };
 
   return (
-    <header className="w-full py-4 px-6 flex justify-end items-center">
+    <header className="w-full py-4 px-6 flex justify-center items-center">
       <div className="flex gap-3">
         <button
           onClick={handlePrint}
