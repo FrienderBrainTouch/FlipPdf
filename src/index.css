@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+:root {
+  font-family: "Bricolage Grotesque", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0e1a26;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  height: 100dvh;
+  width: 100dvw;
+  background: #0e1a26;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+/* FlipBook 커스텀 스타일 */
+.stf__parent {
+  overflow: visible !important;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  #root {
+    padding: 5px;
+  }
+}
