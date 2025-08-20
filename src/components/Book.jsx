@@ -19,6 +19,9 @@ function Book() {
   const animationRef = useRef(null);
   const bookRef = useRef(null);
 
+  // PDF 경로 설정
+  const pdfPath = "/func-file/FrienderFile/프랜더-소개-책자.pdf";
+
   // 화려한 표지 애니메이션 함수
   const animateCover = (duration) => {
     const startTime = performance.now();
@@ -69,6 +72,26 @@ function Book() {
     animationRef.current = requestAnimationFrame(animate);
   };
 
+  // PDF 프린트 기능
+  const printPDF = () => {
+    const printWindow = window.open(pdfPath, '_blank');
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
+  };
+
+  // PDF 다운로드 기능
+  const downloadPDF = () => {
+    const link = document.createElement('a');
+    link.href = pdfPath;
+    link.download = 'Friender 프로젝트.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   // 컴포넌트 마운트 시 표지 페이지 애니메이션 자동 실행
   useEffect(() => {
     // 페이지 로드 후 더 긴 지연을 두고 애니메이션 시작
@@ -106,6 +129,24 @@ function Book() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // 키보드 이벤트 처리
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        if (bookRef.current && currentPage > 0) {
+          bookRef.current.pageFlip().flip(currentPage - 1);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (bookRef.current && currentPage < 7) {
+          bookRef.current.pageFlip().flip(currentPage + 1);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage]);
 
     const frienderData = [
     {
@@ -477,221 +518,268 @@ function Book() {
 
 
   return (
-    <div className="w-full h-full flex justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
-      <HTMLFlipBook 
-        ref={bookRef}
-        width={bookWidth} 
-        height={bookHeight}
-        maxShadowOpacity={0.5}
-        drawShadow={true}
-        showCover={true}
-        flippingTime={300}
-        showPageCorners={false}
-        size='fixed'
-        onFlip={handlePageChange}
-        usePortrait={isMobile}
-        useMouseEvents={true}
-        swipeDistance={50}
-        disableFlipByClick={false}
-      >
-        {/* 표지 페이지 */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden">
-          <div className="w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative">
-            {/* 배경 이미지 */}
-            <img 
-              src="/Pdf-img/Friender/1.jpg"
-              alt="Friender Cover Background" 
-              className="w-full h-full object-cover"
-              style={{
-                transform: `scale(${backgroundScale})`,
-                filter: `blur(${backgroundBlur}px)`,
-                transition: 'transform 0.3s ease-out, filter 0.3s ease-out'
-              }}
-            />
-            
-            {/* main 이미지 오버레이 - 중앙에 배치 */}
-            <div className="absolute inset-0 flex items-center justify-center">
+    <div className="w-full h-full flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
+      {/* 기능 버튼들 */}
+      <div className="flex justify-center gap-4 mb-6">
+        <button 
+          onClick={printPDF}
+          className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
+        >
+          🖨️ 프린트
+        </button>
+        <button 
+          onClick={downloadPDF}
+          className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
+        >
+          📥 PDF 다운로드
+        </button>
+      </div>
+
+      {/* 플립북 컨테이너 */}
+      <div className="flex justify-center items-center perspective-1000">
+        <HTMLFlipBook 
+          ref={bookRef}
+          width={bookWidth} 
+          height={bookHeight}
+          maxShadowOpacity={0.5}
+          drawShadow={true}
+          showCover={true}
+          flippingTime={800}
+          showPageCorners={false}
+          size='fixed'
+          onFlip={handlePageChange}
+          usePortrait={isMobile}
+          useMouseEvents={true}
+          swipeDistance={50}
+          disableFlipByClick={false}
+          className="transform-style-preserve-3d"
+        >
+          {/* 표지 페이지 */}
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden">
+            <div className="w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative">
+              {/* 배경 이미지 */}
               <img 
-                src="/interacivefile/FrienderFile/main.png"
-                alt="Friender Main" 
+                src="/Pdf-img/Friender/1.jpg"
+                alt="Friender Cover Background" 
+                className="w-full h-full object-cover"
                 style={{
-                  width: `${mainImageSize}px`,
-                  height: `${mainImageSize}px`,
-                  opacity: mainImageOpacity,
-                  transform: `rotate(${mainImageRotation}deg)`,
-                  objectFit: 'contain',
-                  transition: 'transform 0.1s linear'
+                  transform: `scale(${backgroundScale})`,
+                  filter: `blur(${backgroundBlur}px)`,
+                  transition: 'transform 0.3s ease-out, filter 0.3s ease-out'
                 }}
               />
               
-              {/* title과 subtitle - main 이미지 위에 오버레이 */}
-              {isMainImageAnimating && mainImageSize > 50 && (
-                <div 
-                  className="absolute"
-                  style={{
-                    left: `${mainImageSize * 0.1}px`, // main 이미지 왼쪽에서 10% 위치
-                    bottom: `${mainImageSize * 0.1 + 50}px`, // main 이미지 아래에서 10% + 50px 위치
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start',
-                    gap: '10px'
-                  }}
-                >
-                  {/* title */}
-                  <img 
-                    src="/interacivefile/FrienderFile/title.png"
-                    alt="Friender Title" 
-                    style={{
-                      width: `${mainImageSize * 0.8}px`, // main 이미지보다 20% 작게
-                      height: 'auto',
-                      opacity: titleOpacity,
-                      transform: `translateY(${20 - (titleOpacity * 20)}px)`,
-                      transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
-                    }}
-                  />
-                  
-                  {/* subtitle */}
-                  <img 
-                    src="/interacivefile/FrienderFile/subtitle.png"
-                    alt="Friender Subtitle" 
-                    style={{
-                      width: `${mainImageSize * 0.5}px`, // main 이미지의 50% 크기
-                      height: 'auto',
-                      opacity: subtitleOpacity,
-                      transform: `translateY(${20 - (subtitleOpacity * 20)}px)`,
-                      transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {frienderData.map((page, index) => (
-          <div 
-            key={page.id} 
-            className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative"
-          >
-            <div className="w-full h-full flex flex-col justify-center items-center p-0">
-              <div className="w-full h-full relative">
+              {/* main 이미지 오버레이 - 중앙에 배치 */}
+              <div className="absolute inset-0 flex items-center justify-center">
                 <img 
-                  src={`/Pdf-img/Friender/${page.id}.jpg`}
-                  alt={page.name} 
-                  className="w-full h-full object-cover pointer-events-none"
+                  src="/interacivefile/FrienderFile/main.png"
+                  alt="Friender Main" 
+                  style={{
+                    width: `${mainImageSize}px`,
+                    height: `${mainImageSize}px`,
+                    opacity: mainImageOpacity,
+                    transform: `rotate(${mainImageRotation}deg)`,
+                    objectFit: 'contain',
+                    transition: 'transform 0.1s linear'
+                  }}
                 />
                 
-                                {/* 각 페이지별 section-img 이미지들을 개별적으로 배치 */}
-                {sectionImgMapping[page.id] && individualImagePositions[page.id] && (
-                  <>
-                    {sectionImgMapping[page.id].map((imgSrc, imgIndex) => (
-                      <div
-                        key={imgIndex}
-                        className="absolute cursor-pointer hover:scale-100 transition-all duration-200 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
-                        style={getResponsiveImagePosition(individualImagePositions[page.id][imgIndex], isMobile)}
-                        onClick={(e) => handleSectionImgClick(imgSrc, e, page.id)}
-                      >
-                        <img 
-                          src={imgSrc}
-                          alt={`Section ${page.id}-${imgIndex + 1}`}
-                          className="w-full h-full object-contain opacity-0"
-                        />
-                      </div>
-                    ))}
-                  </>
-                )}
-                
-                {/* 4페이지(index === 2)에만 기존 environ 이미지들도 추가로 배치 */}
-                {index === 2 && (
+                {/* title과 subtitle - main 이미지 위에 오버레이 */}
+                {isMainImageAnimating && mainImageSize > 50 && (
                   <div 
-                    className="absolute flex justify-between items-center pointer-events-auto"
+                    className="absolute"
                     style={{
-                      top: '13%',
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '85%'
+                      left: `${mainImageSize * 0.1}px`, // main 이미지 왼쪽에서 10% 위치
+                      bottom: `${mainImageSize * 0.1 + 50}px`, // main 이미지 아래에서 10% + 50px 위치
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-start',
+                      gap: '10px'
                     }}
                   >
+                    {/* title */}
                     <img 
-                      src="/interacivefile/FrienderFile/environ-1.png"
-                      alt="Environment 1" 
-                      className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-200"
-                      onClick={(e) => handleGifClick(1, e)}
+                      src="/interacivefile/FrienderFile/title.png"
+                      alt="Friender Title" 
+                      style={{
+                        width: `${mainImageSize * 0.8}px`, // main 이미지보다 20% 작게
+                        height: 'auto',
+                        opacity: titleOpacity,
+                        transform: `translateY(${20 - (titleOpacity * 20)}px)`,
+                        transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
+                      }}
                     />
+                    
+                    {/* subtitle */}
                     <img 
-                      src="/interacivefile/FrienderFile/environ-2.png"
-                      alt="Environment 2" 
-                      className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-200"
-                      onClick={(e) => handleGifClick(2, e)}
-                    />
-                    <img 
-                      src="/interacivefile/FrienderFile/environ-3.png"
-                      alt="Environment 3" 
-                      className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-200"
-                      onClick={(e) => handleGifClick(3, e)}
-                    />
-                    <img 
-                      src="/interacivefile/FrienderFile/environ-4.png"
-                      alt="Environment 4" 
-                      className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-200"
-                      onClick={(e) => handleGifClick(4, e)}
-                    />
-                    <img 
-                      src="/interacivefile/FrienderFile/environ-5.png"
-                      alt="Environment 5" 
-                      className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-200"
-                      onClick={(e) => handleGifClick(5, e)}
-                    />
-                    <img 
-                      src="/interacivefile/FrienderFile/environ-6.png"
-                      alt="Environment 6" 
-                      className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-200"
-                      onClick={(e) => handleGifClick(6, e)}
-                    />
-                  </div>
-                )}
-                
-                {/* 5페이지(index === 3)에만 비디오 추가 */}
-                {index === 3 && (
-                  <div 
-                    className="absolute flex justify-center items-center"
-                    style={{
-                      top: '10%',
-                      left: '47%',
-                      transform: 'translateX(-50%)',
-                      width: '90%'
-                    }}
-                  >
-                    <video 
-                      src="/interacivefile/FrienderFile/BlockCoding-VR.mp4"
-                      className="w-[200px] h-[100px] object-contain"
-                      controls
-                      muted
-                      loop
-                      autoPlay={false}
+                      src="/interacivefile/FrienderFile/subtitle.png"
+                      alt="Friender Subtitle" 
+                      style={{
+                        width: `${mainImageSize * 0.5}px`, // main 이미지의 50% 크기
+                        height: 'auto',
+                        opacity: subtitleOpacity,
+                        transform: `translateY(${20 - (subtitleOpacity * 20)}px)`,
+                        transition: 'opacity 0.3s ease-out, transform 0.3s ease-out'
+                      }}
                     />
                   </div>
                 )}
               </div>
+              
+              {/* 페이지 그림자 효과 */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
             </div>
           </div>
-        ))}
-      </HTMLFlipBook>
 
-      {/* Gif 모달 */}
+          {frienderData.map((page, index) => (
+            <div 
+              key={page.id} 
+              className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative"
+            >
+              <div className="w-full h-full flex flex-col justify-center items-center p-0">
+                <div className="w-full h-full relative">
+                  <img 
+                    src={`/Pdf-img/Friender/${page.id}.jpg`}
+                    alt={page.name} 
+                    className="w-full h-full object-cover pointer-events-none"
+                  />
+                  
+                  {/* 각 페이지별 section-img 이미지들을 개별적으로 배치 */}
+                  {sectionImgMapping[page.id] && individualImagePositions[page.id] && (
+                    <>
+                      {sectionImgMapping[page.id].map((imgSrc, imgIndex) => (
+                        <div
+                          key={imgIndex}
+                          className="absolute cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
+                          style={getResponsiveImagePosition(individualImagePositions[page.id][imgIndex], isMobile)}
+                          onClick={(e) => handleSectionImgClick(imgSrc, e, page.id)}
+                        >
+                          <img 
+                            src={imgSrc}
+                            alt={`Section ${page.id}-${imgIndex + 1}`}
+                            className="w-full h-full object-contain opacity-0 hover:opacity-100 transition-opacity duration-300"
+                          />
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  
+                  {/* 4페이지(index === 2)에만 기존 environ 이미지들도 추가로 배치 */}
+                  {index === 2 && (
+                    <div 
+                      className="absolute flex justify-between items-center pointer-events-auto"
+                      style={{
+                        top: '13%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '85%'
+                      }}
+                    >
+                      <img 
+                        src="/interacivefile/FrienderFile/environ-1.png"
+                        alt="Environment 1" 
+                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        onClick={(e) => handleGifClick(1, e)}
+                      />
+                      <img 
+                        src="/interacivefile/FrienderFile/environ-2.png"
+                        alt="Environment 2" 
+                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        onClick={(e) => handleGifClick(2, e)}
+                      />
+                      <img 
+                        src="/interacivefile/FrienderFile/environ-3.png"
+                        alt="Environment 3" 
+                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        onClick={(e) => handleGifClick(3, e)}
+                      />
+                      <img 
+                        src="/interacivefile/FrienderFile/environ-4.png"
+                        alt="Environment 4" 
+                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        onClick={(e) => handleGifClick(4, e)}
+                      />
+                      <img 
+                        src="/interacivefile/FrienderFile/environ-5.png"
+                        alt="Environment 5" 
+                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        onClick={(e) => handleGifClick(5, e)}
+                      />
+                      <img 
+                        src="/interacivefile/FrienderFile/environ-6.png"
+                        alt="Environment 6" 
+                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        onClick={(e) => handleGifClick(6, e)}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* 5페이지(index === 3)에만 비디오 추가 */}
+                  {index === 3 && (
+                    <div 
+                      className="absolute flex justify-center items-center"
+                      style={{
+                        top: '10%',
+                        left: '47%',
+                        transform: 'translateX(-50%)',
+                        width: '90%'
+                      }}
+                    >
+                      <video 
+                        src="/interacivefile/FrienderFile/BlockCoding-VR.mp4"
+                        className="w-[200px] h-[100px] object-contain cursor-pointer hover:scale-105 transition-transform duration-300"
+                        controls
+                        muted
+                        loop
+                        autoPlay={false}
+                      />
+                    </div>
+                  )}
+                  
+                  {/* 페이지 그림자 효과 */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </HTMLFlipBook>
+      </div>
+
+      {/* 네비게이션 */}
+      <div className="flex justify-center gap-5 mt-6">
+        <button 
+          onClick={() => bookRef.current?.pageFlip().flip(currentPage - 1)}
+          disabled={currentPage === 0}
+          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        >
+          ◀ 이전
+        </button>
+        <span className="px-4 py-2 text-white font-bold">
+          {currentPage + 1} / 8
+        </span>
+        <button 
+          onClick={() => bookRef.current?.pageFlip().flip(currentPage + 1)}
+          disabled={currentPage === 7}
+          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        >
+          다음 ▶
+        </button>
+      </div>
+
+      {/* 개선된 Gif 모달 */}
       {isModalOpen && selectedGif && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={closeModal}
         >
           <div 
-            className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto relative"
+            className="bg-white rounded-2xl p-6 max-w-4xl max-h-[90vh] overflow-auto relative shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 닫기 버튼 */}
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl font-bold z-10 transition-colors duration-300"
             >
               ×
             </button>
@@ -700,7 +788,7 @@ function Book() {
             <img 
               src={selectedGif} 
               alt="Selected Gif" 
-              className="w-full h-auto object-contain"
+              className="w-full h-auto object-contain rounded-lg"
             />
           </div>
         </div>

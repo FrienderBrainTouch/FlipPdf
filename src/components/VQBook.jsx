@@ -13,6 +13,9 @@ function VQBook() {
   const animationRef = useRef(null);
   const bookRef = useRef(null);
 
+  // PDF 경로 설정
+  const pdfPath = "/func-file/VQFile/(주)브이큐스튜디오_소개 카달로그.pdf";
+
   // main 이미지 애니메이션 함수
   const animateMainImage = (startSize, endSize, duration) => {
     const startTime = performance.now();
@@ -33,6 +36,26 @@ function VQBook() {
     };
     
     animationRef.current = requestAnimationFrame(animate);
+  };
+
+  // PDF 프린트 기능
+  const printPDF = () => {
+    const printWindow = window.open(pdfPath, '_blank');
+    if (printWindow) {
+      printWindow.onload = () => {
+        printWindow.print();
+      };
+    }
+  };
+
+  // PDF 다운로드 기능
+  const downloadPDF = () => {
+    const link = document.createElement('a');
+    link.href = pdfPath;
+    link.download = 'VQ 프로젝트.pdf';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // 컴포넌트 마운트 시 표지 페이지 애니메이션 자동 실행
@@ -73,6 +96,24 @@ function VQBook() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // 키보드 이벤트 처리
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'ArrowLeft') {
+        if (bookRef.current && currentPage > 0) {
+          bookRef.current.pageFlip().flip(currentPage - 1);
+        }
+      } else if (e.key === 'ArrowRight') {
+        if (bookRef.current && currentPage < 24) {
+          bookRef.current.pageFlip().flip(currentPage + 1);
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [currentPage]);
 
   // VQ 데이터
   const vqData = [
@@ -520,102 +561,148 @@ function VQBook() {
   };
 
   return (
-    <div className="w-full h-full flex justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
-      <HTMLFlipBook 
-        ref={bookRef}
-        width={bookWidth} 
-        height={bookHeight}
-        maxShadowOpacity={0.5}
-        drawShadow={true}
-        showCover={true}
-        flippingTime={300}
-        showPageCorners={false}
-        size='fixed'
-        onFlip={handlePageChange}
-        usePortrait={isMobile}
-        useMouseEvents={true}
-        swipeDistance={50}
-        disableFlipByClick={false}
-      >
-        {/* 표지 페이지 */}
-        <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden">
-          <div className="w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative">
-            {/* 배경 이미지 */}
-            <img 
-              src="/Pdf-img/VQ/1.png"
-              alt="VQ Cover Background" 
-              className="w-full h-full object-cover"
-            />
-          
-          </div>
-        </div>
+    <div className="w-full h-full flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
+      {/* 기능 버튼들 */}
+      <div className="flex justify-center gap-4 mb-6">
+        <button 
+          onClick={printPDF}
+          className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
+        >
+          🖨️ 프린트
+        </button>
+        <button 
+          onClick={downloadPDF}
+          className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
+        >
+          📥 PDF 다운로드
+        </button>
+      </div>
 
-        {vqData.map((page, index) => (
-          <div 
-            key={page.id} 
-            className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative"
-          >
-            <div className="w-full h-full flex flex-col justify-center items-center p-0">
-              <div className="w-full h-full relative">
-                <img 
-                  src={`/Pdf-img/VQ/${page.id}.png`}
-                  alt={page.name} 
-                  className="w-full h-full object-cover pointer-events-none"
-                />
-                
-                {/* 각 페이지별 section-img 이미지들을 개별적으로 배치 */}
-                {vqSectionImgMapping[page.id] && vqIndividualImagePositions[page.id] && (
-                  <>
-                    {vqSectionImgMapping[page.id].map((mediaSrc, imgIndex) => {
-                      const isVideo = mediaSrc.endsWith('.mp4');
-                      return (
-                        <div
-                          key={imgIndex}
-                          className="absolute cursor-pointer hover:scale-100 transition-all duration-200 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
-                          style={getResponsiveImagePosition(vqIndividualImagePositions[page.id][imgIndex], isMobile)}
-                          onClick={(e) => handleSectionImgClick(mediaSrc, e, page.id)}
-                        >
-                          {isVideo ? (
-                            <video 
-                              src={mediaSrc}
-                              className="w-full h-full rounded-lg object-contain opacity-100"
-                              controls
-                              muted
-                              loop
-                              autoPlay={false}
-                            />
-                          ) : (
-                            <img 
-                              src={mediaSrc}
-                              alt={`Section ${page.id}-${imgIndex + 1}`}
-                              className="w-full h-full object-contain opacity-0"
-                            />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </>
-                )}
-              </div>
+      {/* 플립북 컨테이너 */}
+      <div className="flex justify-center items-center perspective-1000">
+        <HTMLFlipBook 
+          ref={bookRef}
+          width={bookWidth} 
+          height={bookHeight}
+          maxShadowOpacity={0.5}
+          drawShadow={true}
+          showCover={true}
+          flippingTime={800}
+          showPageCorners={false}
+          size='fixed'
+          onFlip={handlePageChange}
+          usePortrait={isMobile}
+          useMouseEvents={true}
+          swipeDistance={50}
+          disableFlipByClick={false}
+          className="transform-style-preserve-3d"
+        >
+          {/* 표지 페이지 */}
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden">
+            <div className="w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative">
+              {/* 배경 이미지 */}
+              <img 
+                src="/Pdf-img/VQ/1.png"
+                alt="VQ Cover Background" 
+                className="w-full h-full object-cover"
+              />
+              
+              {/* 페이지 그림자 효과 */}
+              <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
             </div>
           </div>
-        ))}
-      </HTMLFlipBook>
 
-      {/* Gif 모달 */}
+          {vqData.map((page, index) => (
+            <div 
+              key={page.id} 
+              className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative"
+            >
+              <div className="w-full h-full flex flex-col justify-center items-center p-0">
+                <div className="w-full h-full relative">
+                  <img 
+                    src={`/Pdf-img/VQ/${page.id}.png`}
+                    alt={page.name} 
+                    className="w-full h-full object-cover pointer-events-none"
+                  />
+                  
+                  {/* 각 페이지별 section-img 이미지들을 개별적으로 배치 */}
+                  {vqSectionImgMapping[page.id] && vqIndividualImagePositions[page.id] && (
+                    <>
+                      {vqSectionImgMapping[page.id].map((mediaSrc, imgIndex) => {
+                        const isVideo = mediaSrc.endsWith('.mp4');
+                        return (
+                          <div
+                            key={imgIndex}
+                            className="absolute cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
+                            style={getResponsiveImagePosition(vqIndividualImagePositions[page.id][imgIndex], isMobile)}
+                            onClick={(e) => handleSectionImgClick(mediaSrc, e, page.id)}
+                          >
+                            {isVideo ? (
+                              <video 
+                                src={mediaSrc}
+                                className="w-full h-full rounded-lg object-contain opacity-100 cursor-pointer hover:scale-105 transition-transform duration-300"
+                                controls
+                                muted
+                                loop
+                                autoPlay={false}
+                              />
+                            ) : (
+                              <img 
+                                src={mediaSrc}
+                                alt={`Section ${page.id}-${imgIndex + 1}`}
+                                className="w-full h-full object-contain opacity-0 hover:opacity-100 transition-opacity duration-300"
+                              />
+                            )}
+                          </div>
+                        );
+                      })}
+                    </>
+                  )}
+                  
+                  {/* 페이지 그림자 효과 */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </HTMLFlipBook>
+      </div>
+
+      {/* 네비게이션 */}
+      <div className="flex justify-center gap-5 mt-6">
+        <button 
+          onClick={() => bookRef.current?.pageFlip().flip(currentPage - 1)}
+          disabled={currentPage === 0}
+          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        >
+          ◀ 이전
+        </button>
+        <span className="px-4 py-2 text-white font-bold">
+          {currentPage + 1} / 25
+        </span>
+        <button 
+          onClick={() => bookRef.current?.pageFlip().flip(currentPage + 1)}
+          disabled={currentPage === 24}
+          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        >
+          다음 ▶
+        </button>
+      </div>
+
+      {/* 개선된 Gif 모달 */}
       {isModalOpen && selectedGif && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50"
           onClick={closeModal}
         >
           <div 
-            className="bg-white rounded-lg p-4 max-w-4xl max-h-[90vh] overflow-auto relative"
+            className="bg-white rounded-2xl p-6 max-w-4xl max-h-[90vh] overflow-auto relative shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 닫기 버튼 */}
             <button
               onClick={closeModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold z-10"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-3xl font-bold z-10 transition-colors duration-300"
             >
               ×
             </button>
@@ -624,7 +711,7 @@ function VQBook() {
             {selectedGif.endsWith('.mp4') ? (
               <video 
                 src={selectedGif} 
-                className="w-full h-auto object-contain"
+                className="w-full h-auto object-contain rounded-lg"
                 controls
                 muted
                 loop
@@ -634,7 +721,7 @@ function VQBook() {
               <img 
                 src={selectedGif} 
                 alt="Selected Media" 
-                className="w-full h-auto object-contain"
+                className="w-full h-auto object-contain rounded-lg"
               />
             )}
           </div>
