@@ -428,13 +428,99 @@
         .page.flipped .page-shadow {
             background: linear-gradient(to left, rgba(0,0,0,0.1), transparent);
         }
+
+        /* 3D 모델링 컨테이너 */
+        .model-3d-container {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            perspective: 1000px;
+            cursor: grab;
+            transition: transform 0.1s ease;
+        }
+
+        .model-3d-container:active {
+            cursor: grabbing;
+        }
+
+        .model-3d {
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        /* 3D 모델의 각 면 */
+        .model-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-sizing: border-box;
+        }
+
+        .model-face.front { 
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            transform: translateZ(100px);
+        }
+        .model-face.back { 
+            background: linear-gradient(45deg, #4834d4, #686de0);
+            transform: translateZ(-100px) rotateY(180deg);
+        }
+        .model-face.right { 
+            background: linear-gradient(45deg, #00d2d3, #54a0ff);
+            transform: translateX(100px) rotateY(90deg);
+        }
+        .model-face.left { 
+            background: linear-gradient(45deg, #ff9ff3, #f368e0);
+            transform: translateX(-100px) rotateY(-90deg);
+        }
+        .model-face.top { 
+            background: linear-gradient(45deg, #26de81, #20bf6b);
+            transform: translateY(-100px) rotateX(90deg);
+        }
+        .model-face.bottom { 
+            background: linear-gradient(45deg, #fd79a8, #e84393);
+            transform: translateY(100px) rotateX(-90deg);
+        }
+
+        /* 3D 모델 제어 버튼 */
+        .model-controls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .model-control-btn {
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .model-control-btn:hover {
+            background: white;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- 헤더 -->
         <div class="header">
-            
             <!-- 책 선택 버튼 -->
             <div class="book-selector">
                 <button class="book-btn active" id="friender-btn" data-book="friender">Friender 프로젝트</button>
@@ -581,7 +667,6 @@
                             position: { bottom: '3%', right: '0%', width: '100%', maxWidth: '340px' },
                             clickAction: 'modal'
                         },
-                        // 환경 관련 이미지들 추가 (React와 동일한 위치)
                         {
                             type: 'image',
                             src: './public/interacivefile/FrienderFile/environ-1.png',
@@ -642,7 +727,6 @@
                             position: { bottom: '3%', right: '10%', width: '100%', maxWidth: '340px' },
                             clickAction: 'modal'
                         },
-                        // 비디오 추가 (React와 동일한 위치)
                         {
                             type: 'video',
                             src: './public/interacivefile/FrienderFile/BlockCoding-VR.mp4',
@@ -738,20 +822,18 @@
                     isCover: true,
                     interactiveElements: []
                 }
-                // VQ 페이지들은 동적으로 생성 (24페이지)
             ]
         };
 
         // VQ 페이지 데이터 동적 생성
         for (let i = 2; i <= 23; i++) {
             vqData.pages.push({
-                id: i - 1,  // 1부터 시작
+                id: i - 1,
                 image: `./public/Pdf-img/VQ/${i}.png`,
                 interactiveElements: []
             });
         }
         
-        // 마지막 페이지 추가
         vqData.pages.push({
             id: 'last',
             image: './public/Pdf-img/VQ/24.png',
@@ -759,7 +841,7 @@
             interactiveElements: []
         });
 
-        // 특별한 VQ 페이지들에 인터랙티브 요소 추가 (React와 동일한 위치)
+        // VQ 페이지들에 인터랙티브 요소 추가
         vqData.pages[1].interactiveElements = [
             {
                 type: 'image',
@@ -781,199 +863,12 @@
             }
         ];
 
-        vqData.pages[2].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/3-1.png',
-                position: { top: '17%', left: '4%', width: '100%', maxWidth: '310px' },
-                clickAction: 'modal'
-            },
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/3-2.png',
-                position: { bottom: '4%', right: '12%', width: '100%', maxWidth: '310px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        // 추가 VQ 페이지들에 인터랙티브 요소 추가 (React와 동일한 위치)
-        vqData.pages[3].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/4-1.png',
-                position: { top: '9%', left: '8%', width: '100%', maxWidth: '300px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[4].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/5-1.png',
-                position: { bottom: '6%', right: '7%', width: '100%', maxWidth: '180px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[5].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/6-1.png',
-                position: { top: '19%', left: '25%', width: '100%', maxWidth: '190px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[6].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/7-1.png',
-                position: { top: '19%', left: '9%', width: '100%', maxWidth: '300px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[7].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/8-1.png',
-                position: { top: '20%', left: '25%', width: '100%', maxWidth: '190px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[8].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/9-1.png',
-                position: { top: '19%', left: '16%', width: '100%', maxWidth: '245px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[9].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/10-1.png',
-                position: { top: '20%', left: '25%', width: '100%', maxWidth: '190px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[10].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/11-1.png',
-                position: { top: '17%', left: '24%', width: '100%', maxWidth: '184px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[11].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/12-1.png',
-                position: { top: '20%', left: '24%', width: '100%', maxWidth: '195px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[12].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/13-1.png',
-                position: { top: '11%', left: '0%', width: '100%', maxWidth: '292px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[13].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/14-1.png',
-                position: { top: '20%', left: '25%', width: '100%', maxWidth: '190px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[14].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/15-1.png',
-                position: { top: '30%', left: '14%', width: '100%', maxWidth: '268px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[15].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/16-1.png',
-                position: { top: '20%', left: '25%', width: '100%', maxWidth: '190px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[16].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/17-1.png',
-                position: { top: '8%', left: '0%', width: '100%', maxWidth: '288px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[17].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/18-1.png',
-                position: { top: '10%', left: '9%', width: '100%', maxWidth: '298px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        // 19페이지에 비디오 추가 (React와 동일한 위치)
+        // 추가 VQ 페이지들에 인터랙티브 요소 추가
         vqData.pages[18].interactiveElements = [
             {
                 type: 'video',
                 src: './public/interacivefile/VQFile/19-1-video.mp4',
                 position: { top: '10%', left: '25%', width: '175px', maxWidth: '175px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[19].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/20-1.png',
-                position: { top: '9%', left: '9%', width: '100%', maxWidth: '308px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[20].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/21-1.png',
-                position: { top: '9%', left: '12%', width: '100%', maxWidth: '264px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[21].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/22-1.png',
-                position: { top: '27%', left: '13%', width: '100%', maxWidth: '284px' },
-                clickAction: 'modal'
-            }
-        ];
-
-        vqData.pages[22].interactiveElements = [
-            {
-                type: 'image',
-                src: './public/interacivefile/VQFile/sectionimg/23-1.png',
-                position: { top: '35%', left: '31%', width: '100%', maxWidth: '134px' },
                 clickAction: 'modal'
             }
         ];
@@ -991,7 +886,6 @@
 
         // 이벤트 리스너 설정
         function setupEventListeners() {
-            // 책 선택 버튼들
             document.getElementById('friender-btn').addEventListener('click', function() {
                 switchBook('friender');
             });
@@ -1000,25 +894,18 @@
                 switchBook('vq');
             });
 
-            // 기능 버튼들
             document.getElementById('print-btn').addEventListener('click', printPDF);
             document.getElementById('download-btn').addEventListener('click', downloadPDF);
-
-            // 네비게이션 버튼들
             document.getElementById('prevBtn').addEventListener('click', previousPage);
             document.getElementById('nextBtn').addEventListener('click', nextPage);
-
-            // 모달 닫기
             document.getElementById('closeModal').addEventListener('click', closeModal);
 
-            // 모달 외부 클릭 시 닫기
             document.getElementById('modal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeModal();
                 }
             });
 
-            // 키보드 이벤트
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'ArrowLeft') {
                     previousPage();
@@ -1027,7 +914,6 @@
                 }
             });
 
-            // 윈도우 리사이즈
             window.addEventListener('resize', function() {
                 const wasMobile = isMobile;
                 isMobile = window.innerWidth < 768;
@@ -1036,9 +922,6 @@
                     renderBook();
                 }
             });
-
-            // 페이지 언로드 시 애니메이션 정리
-            window.addEventListener('beforeunload', cleanupAnimation);
         }
 
         // 책 렌더링
@@ -1046,7 +929,6 @@
             const bookElement = document.getElementById('book');
             bookElement.innerHTML = '';
 
-            // 모바일 체크
             if (isMobile) {
                 bookElement.classList.add('mobile');
             } else {
@@ -1058,18 +940,15 @@
                 bookElement.appendChild(pageElement);
             });
 
-            // 초기 페이지 상태 설정 - 커버 페이지만 보이게
             if (currentPage === 0) {
                 for (let i = 0; i < totalPages; i++) {
                     const pageElement = document.getElementById(`page-${i}`);
                     if (pageElement) {
                         if (i === 0) {
-                            // 첫 페이지(커버)만 보이게
                             pageElement.style.display = 'block';
                             pageElement.style.transform = 'translateX(0)';
                             pageElement.classList.add('left-page');
                         } else {
-                            // 나머지 페이지는 숨기기
                             pageElement.style.display = 'none';
                         }
                     }
@@ -1088,7 +967,6 @@
             pageContent.className = 'page-content';
 
             if (page.isCover) {
-                // 표지 페이지
                 pageContent.className += ' cover-page';
                 if (bookData.name === 'Friender 프로젝트') {
                     const coverBackground = document.createElement('img');
@@ -1109,7 +987,6 @@
                     overlayDiv.appendChild(mainImage);
                     pageContent.appendChild(overlayDiv);
 
-                    // title과 subtitle 컨테이너
                     const textContainer = document.createElement('div');
                     textContainer.id = 'cover-text-container';
                     textContainer.className = 'absolute';
@@ -1138,21 +1015,18 @@
                     pageContent.appendChild(coverBackground);
                 }
             } else {
-                // 일반 페이지
                 const pageImage = document.createElement('img');
                 pageImage.src = page.image;
                 pageImage.alt = page.id === 'last' ? 'Last Page' : `Page ${page.id}`;
                 pageImage.className = 'page-image';
                 pageContent.appendChild(pageImage);
 
-                // 인터랙티브 요소들 추가
                 page.interactiveElements.forEach((element, elementIndex) => {
                     const interactiveDiv = createInteractiveElement(element, elementIndex);
                     pageContent.appendChild(interactiveDiv);
                 });
             }
 
-            // 페이지 그림자
             const shadow = document.createElement('div');
             shadow.className = 'page-shadow';
             pageContent.appendChild(shadow);
@@ -1175,7 +1049,6 @@
                 maxWidth: `${getResponsiveImageSize(parseInt(baseConfig.maxWidth), isMobile)}px`
             };
             
-            // top, left, bottom, right 속성들을 그대로 유지
             if (baseConfig.top) result.top = baseConfig.top;
             if (baseConfig.left) result.left = baseConfig.left;
             if (baseConfig.bottom) result.bottom = baseConfig.bottom;
@@ -1189,12 +1062,10 @@
             const div = document.createElement('div');
             div.className = 'interactive-image';
             
-            // 반응형 위치 계산
             const responsivePosition = getResponsiveImagePosition(element.position, isMobile);
             
             div.style.position = 'absolute';
             
-            // top, left, bottom, right 속성을 개별적으로 설정
             if (responsivePosition.top) {
                 div.style.top = responsivePosition.top;
             }
@@ -1218,7 +1089,7 @@
                 img.style.width = '100%';
                 img.style.height = '100%';
                 img.style.objectFit = 'contain';
-                img.style.opacity = '0'; // React와 동일하게 투명도 0으로 시작
+                img.style.opacity = '0';
                 div.appendChild(img);
             } else if (element.type === 'video') {
                 const video = document.createElement('video');
@@ -1229,11 +1100,10 @@
                 video.style.width = '100%';
                 video.style.height = '100%';
                 video.style.objectFit = 'contain';
-                video.style.opacity = '1'; // 비디오는 보이게
+                video.style.opacity = '1';
                 div.appendChild(video);
             }
 
-            // 클릭 이벤트
             div.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -1250,9 +1120,6 @@
             const maxPageIndex = Math.ceil((totalPages - 1) / 2);
             if (pageIndex < 0 || pageIndex > maxPageIndex) return;
 
-            console.log('flipToPage called with pageIndex:', pageIndex);
-
-            // 모든 페이지를 완전히 숨김 (더 강력한 방법)
             for (let i = 0; i < totalPages; i++) {
                 const pageElement = document.getElementById(`page-${i}`);
                 if (pageElement) {
@@ -1266,16 +1133,13 @@
                 }
             }
 
-            // 현재 페이지를 타겟 페이지로 설정
             currentPage = pageIndex;
             updateNavigation();
 
-            // 페이지 표시/숨김 처리
             for (let i = 0; i < totalPages; i++) {
                 const pageElement = document.getElementById(`page-${i}`);
                 if (pageElement) {
                     if (pageIndex === 0) {
-                        // 첫 페이지(커버): 커버만 보이게
                         if (i === 0) {
                             pageElement.style.display = 'block';
                             pageElement.style.visibility = 'visible';
@@ -1284,7 +1148,6 @@
                             pageElement.style.zIndex = totalPages;
                             pageElement.style.transform = 'translateX(0)';
                             pageElement.classList.add('left-page');
-                            console.log('Showing page-0 (cover)');
                         } else {
                             pageElement.style.display = 'none';
                             pageElement.style.visibility = 'hidden';
@@ -1292,7 +1155,6 @@
                             pageElement.style.pointerEvents = 'none';
                         }
                     } else if (pageIndex === Math.ceil((totalPages - 1) / 2)) {
-                        // 마지막 페이지: 마지막 페이지만 보이게
                         if (i === totalPages - 1) {
                             pageElement.style.display = 'block';
                             pageElement.style.visibility = 'visible';
@@ -1301,7 +1163,6 @@
                             pageElement.style.zIndex = totalPages;
                             pageElement.style.transform = 'translateX(0)';
                             pageElement.classList.add('left-page');
-                            console.log('Showing last page');
                         } else {
                             pageElement.style.display = 'none';
                             pageElement.style.visibility = 'hidden';
@@ -1309,32 +1170,26 @@
                             pageElement.style.pointerEvents = 'none';
                         }
                     } else {
-                        // 중간 페이지들: pageIndex에 따라 페이지 쌍을 표시
-                        const leftPageIndex = pageIndex * 2 - 1;  // 1, 3, 5, 7...
-                        const rightPageIndex = leftPageIndex + 1;  // 2, 4, 6, 8...
+                        const leftPageIndex = pageIndex * 2 - 1;
+                        const rightPageIndex = leftPageIndex + 1;
                         
-                                                 if (i === leftPageIndex) {  // 배열 인덱스는 1부터 시작
-                             // 왼쪽 페이지
-                             pageElement.style.display = 'block';
-                             pageElement.style.visibility = 'visible';
-                             pageElement.style.opacity = '1';
-                             pageElement.style.pointerEvents = 'auto';
-                             pageElement.style.zIndex = totalPages;
-                             pageElement.style.transform = 'translateX(-50%)';
-                             pageElement.classList.add('left-page');
-                             console.log('Showing left page:', leftPageIndex);
-                         } else if (i === rightPageIndex && rightPageIndex < totalPages - 1) {
-                             // 오른쪽 페이지 (마지막 페이지 제외)
-                             pageElement.style.display = 'block';
-                             pageElement.style.visibility = 'visible';
-                             pageElement.style.opacity = '1';
-                             pageElement.style.pointerEvents = 'auto';
-                             pageElement.style.zIndex = totalPages - 1;
-                             pageElement.style.transform = 'translateX(50%)';
-                             pageElement.classList.add('right-page');
-                             console.log('Showing right page:', rightPageIndex);
+                        if (i === leftPageIndex) {
+                            pageElement.style.display = 'block';
+                            pageElement.style.visibility = 'visible';
+                            pageElement.style.opacity = '1';
+                            pageElement.style.pointerEvents = 'auto';
+                            pageElement.style.zIndex = totalPages;
+                            pageElement.style.transform = 'translateX(-50%)';
+                            pageElement.classList.add('left-page');
+                        } else if (i === rightPageIndex && rightPageIndex < totalPages - 1) {
+                            pageElement.style.display = 'block';
+                            pageElement.style.visibility = 'visible';
+                            pageElement.style.opacity = '1';
+                            pageElement.style.pointerEvents = 'auto';
+                            pageElement.style.zIndex = totalPages - 1;
+                            pageElement.style.transform = 'translateX(50%)';
+                            pageElement.classList.add('right-page');
                         } else {
-                            // 나머지 페이지는 숨기기
                             pageElement.style.display = 'none';
                             pageElement.style.visibility = 'hidden';
                             pageElement.style.opacity = '0';
@@ -1344,7 +1199,6 @@
                 }
             }
 
-            // 표지 페이지 애니메이션
             if (pageIndex === 0) {
                 startCoverAnimation();
             }
@@ -1371,7 +1225,7 @@
             const nextBtn = document.getElementById('nextBtn');
             const pageInfo = document.getElementById('pageInfo');
 
-            const maxPageIndex = Math.ceil((totalPages - 1) / 2);  // 마지막 pageIndex
+            const maxPageIndex = Math.ceil((totalPages - 1) / 2);
 
             prevBtn.disabled = currentPage === 0;
             nextBtn.disabled = currentPage === maxPageIndex;
@@ -1389,7 +1243,7 @@
         let backgroundScale = 1.2;
         let backgroundBlur = 0;
 
-        // 화려한 표지 애니메이션 함수 (React와 동일)
+        // 화려한 표지 애니메이션 함수
         function animateCover(duration) {
             const startTime = performance.now();
             
@@ -1397,7 +1251,6 @@
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
                 
-                // 배경 애니메이션 (0-30%)
                 if (progress <= 0.3) {
                     const bgProgress = progress / 0.3;
                     backgroundScale = 1.2 - (0.2 * bgProgress);
@@ -1405,7 +1258,6 @@
                     updateBackgroundAnimation();
                 }
                 
-                // 메인 이미지 등장 애니메이션 (20-50%)
                 if (progress >= 0.2 && progress <= 0.5) {
                     const imgProgress = (progress - 0.2) / 0.3;
                     mainImageOpacity = imgProgress;
@@ -1414,15 +1266,13 @@
                     updateMainImageAnimation();
                 }
                 
-                // 메인 이미지 크기 조정 및 회전 정리 (50-80%)
                 if (progress >= 0.5 && progress <= 0.8) {
                     const sizeProgress = (progress - 0.5) / 0.3;
-                    mainImageSize = 320 + (0 * sizeProgress); // 크기 유지
-                    mainImageRotation = 360 - (360 * sizeProgress); // 360도에서 0도로 회전 정리
+                    mainImageSize = 320 + (0 * sizeProgress);
+                    mainImageRotation = 360 - (360 * sizeProgress);
                     updateMainImageAnimation();
                 }
                 
-                // 타이틀과 서브타이틀 등장 (70-100%)
                 if (progress >= 0.7 && progress <= 1) {
                     const textProgress = (progress - 0.7) / 0.3;
                     titleOpacity = textProgress;
@@ -1430,7 +1280,6 @@
                     updateTextAnimation();
                 }
                 
-                // 애니메이션 완료 시 회전을 0도로 직접 설정
                 if (progress >= 1) {
                     mainImageRotation = 0;
                     updateMainImageAnimation();
@@ -1465,17 +1314,14 @@
                 mainImage.style.transform = `rotate(${mainImageRotation}deg)`;
             }
             
-                         // 메인 이미지가 충분히 커지면 텍스트 컨테이너 표시 (React와 동일한 조건)
-             if (textContainer && isMainImageAnimating && mainImageSize > 50) {
-                 textContainer.style.display = 'flex';
-                 // main 이미지 중앙에 오버레이되도록 위치 조정
-                 const containerWidth = mainImageSize * 0.8; // title 이미지 크기
-                 const containerHeight = mainImageSize * 0.5; // subtitle 이미지 크기
-                 
-                 // main 이미지 중앙에 텍스트 컨테이너 배치
-                 textContainer.style.left = `calc(50% - ${containerWidth / 2}px)`;
-                 textContainer.style.top = `calc(50% - ${containerHeight / 2}px)`;
-             }
+            if (textContainer && isMainImageAnimating && mainImageSize > 50) {
+                textContainer.style.display = 'flex';
+                const containerWidth = mainImageSize * 0.8;
+                const containerHeight = mainImageSize * 0.5;
+                
+                textContainer.style.left = `calc(50% - ${containerWidth / 2}px)`;
+                textContainer.style.top = `calc(50% - ${containerHeight / 2}px)`;
+            }
         }
 
         // 텍스트 애니메이션 업데이트
@@ -1484,14 +1330,14 @@
             const subtitleImg = document.getElementById('cover-subtitle-img');
             
             if (titleImg) {
-                titleImg.style.width = `${mainImageSize * 0.8}px`; // main 이미지보다 20% 작게
+                titleImg.style.width = `${mainImageSize * 0.8}px`;
                 titleImg.style.height = 'auto';
                 titleImg.style.opacity = titleOpacity;
                 titleImg.style.transform = `translateY(${20 - (titleOpacity * 20)}px)`;
             }
             
             if (subtitleImg) {
-                subtitleImg.style.width = `${mainImageSize * 0.5}px`; // main 이미지의 50% 크기
+                subtitleImg.style.width = `${mainImageSize * 0.5}px`;
                 subtitleImg.style.height = 'auto';
                 subtitleImg.style.opacity = subtitleOpacity;
                 subtitleImg.style.transform = `translateY(${20 - (subtitleOpacity * 20)}px)`;
@@ -1500,7 +1346,6 @@
 
         // 표지 애니메이션 시작
         function startCoverAnimation() {
-            // 애니메이션 초기화
             isMainImageAnimating = false;
             mainImageSize = 1;
             mainImageRotation = 0;
@@ -1510,12 +1355,9 @@
             backgroundScale = 1.2;
             backgroundBlur = 0;
 
-            // Friender 프로젝트일 때만 애니메이션 실행
             if (bookData.name === 'Friender 프로젝트') {
-                // 1초 후에 화려한 애니메이션 시작
                 setTimeout(() => {
                     isMainImageAnimating = true;
-                    // 화려한 애니메이션 시작 (3초)
                     animateCover(3000);
                 }, 1000);
             }
@@ -1526,20 +1368,19 @@
             const modal = document.getElementById('modal');
             const modalContent = document.getElementById('modalContent');
 
-            // 기존 내용 제거
             modalContent.innerHTML = '';
 
-            // 환경 관련 이미지인지 확인 (environ-1.png ~ environ-6.png)
-            const isEnvironImage = src.includes('environ-');
+            const isEnvironImage = src && src.includes('environ-');
+            const is3DModelImage = src && src.includes('3-3.png');
             let actualSrc = src;
             let actualType = type;
 
             if (isEnvironImage && currentBook === 'friender') {
-                // 환경 이미지 번호 추출
                 const environNumber = src.match(/environ-(\d+)\.png/)[1];
-                // 해당하는 GIF로 변경
                 actualSrc = frienderGifMapping[environNumber];
-                actualType = 'image'; // GIF는 이미지로 처리
+                actualType = 'image';
+            } else if (is3DModelImage && currentBook === 'friender') {
+                actualType = '3d-model';
             }
 
             if (actualType === 'video') {
@@ -1550,6 +1391,9 @@
                 video.className = 'modal-media';
                 video.textContent = 'Your browser does not support the video tag.';
                 modalContent.appendChild(video);
+            } else if (actualType === '3d-model') {
+                const modal3DContainer = createModal3DModel();
+                modalContent.appendChild(modal3DContainer);
             } else {
                 const img = document.createElement('img');
                 img.src = actualSrc;
@@ -1561,27 +1405,229 @@
             modal.style.display = 'block';
         }
 
+        // 모달용 3D 모델링 생성 함수
+        function createModal3DModel() {
+            const container = document.createElement('div');
+            container.className = 'model-3d-container';
+            container.style.width = '400px';
+            container.style.height = '400px';
+            container.style.margin = '0 auto';
+            container.style.transform = 'none';
+            container.style.position = 'relative';
+            container.style.perspective = '1000px';
+
+            const model = document.createElement('div');
+            model.className = 'model-3d';
+            model.id = 'modal-model-3d';
+            model.style.width = '100%';
+            model.style.height = '100%';
+            model.style.transformStyle = 'preserve-3d';
+            model.style.transition = 'transform 0.3s ease';
+
+            const faces = [
+                { class: 'front', text: '3D 모델' },
+                { class: 'back', text: '뒤면' },
+                { class: 'right', text: '오른쪽' },
+                { class: 'left', text: '왼쪽' },
+                { class: 'top', text: '위쪽' },
+                { class: 'bottom', text: '아래쪽' }
+            ];
+
+            faces.forEach(face => {
+                const faceDiv = document.createElement('div');
+                faceDiv.className = `model-face ${face.class}`;
+                faceDiv.textContent = face.text;
+                faceDiv.style.fontSize = '32px';
+                faceDiv.style.position = 'absolute';
+                faceDiv.style.width = '100%';
+                faceDiv.style.height = '100%';
+                faceDiv.style.display = 'flex';
+                faceDiv.style.alignItems = 'center';
+                faceDiv.style.justifyContent = 'center';
+                faceDiv.style.fontWeight = 'bold';
+                faceDiv.style.color = 'white';
+                faceDiv.style.border = '2px solid rgba(255, 255, 255, 0.3)';
+                faceDiv.style.boxSizing = 'border-box';
+                model.appendChild(faceDiv);
+            });
+
+            container.appendChild(model);
+
+            const controls = document.createElement('div');
+            controls.className = 'model-controls';
+            controls.style.position = 'relative';
+            controls.style.bottom = 'auto';
+            controls.style.left = 'auto';
+            controls.style.transform = 'none';
+            controls.style.marginTop = '20px';
+            controls.style.justifyContent = 'center';
+            controls.style.display = 'flex';
+            controls.style.gap = '10px';
+            
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'model-control-btn';
+            resetBtn.textContent = '리셋';
+            resetBtn.onclick = () => resetModal3DModel();
+            
+            const autoRotateBtn = document.createElement('button');
+            autoRotateBtn.className = 'model-control-btn';
+            autoRotateBtn.textContent = '자동회전';
+            autoRotateBtn.onclick = () => toggleModalAutoRotate();
+            
+            controls.appendChild(resetBtn);
+            controls.appendChild(autoRotateBtn);
+            container.appendChild(controls);
+
+            setupModal3DModelControls(container, model);
+
+            modalRotationX = 0;
+            modalRotationY = 0;
+            updateModal3DModelRotation(model);
+
+            return container;
+        }
+
+        // 3D 모델 제어 변수들
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let modalRotationX = 0;
+        let modalRotationY = 0;
+        let modalAutoRotate = false;
+        let modalAutoRotateInterval = null;
+
+        // 모달용 3D 모델 마우스/터치 제어 설정
+        function setupModal3DModelControls(container, model) {
+            container.addEventListener('mousedown', startModalDrag);
+            document.addEventListener('mousemove', modalDrag);
+            document.addEventListener('mouseup', endModalDrag);
+
+            container.addEventListener('touchstart', startModalDrag, { passive: false });
+            document.addEventListener('touchmove', modalDrag, { passive: false });
+            document.addEventListener('touchend', endModalDrag);
+
+            function startModalDrag(e) {
+                e.preventDefault();
+                isDragging = true;
+                
+                if (e.type === 'mousedown') {
+                    startX = e.clientX;
+                    startY = e.clientY;
+                } else if (e.type === 'touchstart') {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }
+                
+                container.style.cursor = 'grabbing';
+            }
+
+            function modalDrag(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+
+                let currentX, currentY;
+                
+                if (e.type === 'mousemove') {
+                    currentX = e.clientX;
+                    currentY = e.clientY;
+                } else if (e.type === 'touchmove') {
+                    currentX = e.touches[0].clientX;
+                    currentY = e.touches[0].clientY;
+                }
+
+                const deltaX = currentX - startX;
+                const deltaY = currentY - startY;
+
+                modalRotationY += deltaX * 0.5;
+                modalRotationX -= deltaY * 0.5;
+
+                modalRotationX = Math.max(-90, Math.min(90, modalRotationX));
+
+                updateModal3DModelRotation(model);
+
+                startX = currentX;
+                startY = currentY;
+            }
+
+            function endModalDrag() {
+                isDragging = false;
+                container.style.cursor = 'grab';
+            }
+        }
+
+        // 모달용 3D 모델 회전 업데이트
+        function updateModal3DModelRotation(model) {
+            if (model) {
+                model.style.transform = `rotateX(${modalRotationX}deg) rotateY(${modalRotationY}deg)`;
+            }
+        }
+
+        // 모달용 3D 모델 리셋
+        function resetModal3DModel() {
+            modalRotationX = 0;
+            modalRotationY = 0;
+            const model = document.getElementById('modal-model-3d');
+            if (model) {
+                updateModal3DModelRotation(model);
+            }
+            if (modalAutoRotateInterval) {
+                clearInterval(modalAutoRotateInterval);
+                modalAutoRotateInterval = null;
+                modalAutoRotate = false;
+            }
+        }
+
+        // 모달용 자동 회전 토글
+        function toggleModalAutoRotate() {
+            modalAutoRotate = !modalAutoRotate;
+            const model = document.getElementById('modal-model-3d');
+            
+            if (modalAutoRotate) {
+                modalAutoRotateInterval = setInterval(() => {
+                    modalRotationY += 2;
+                    if (model) {
+                        updateModal3DModelRotation(model);
+                    }
+                }, 50);
+            } else {
+                if (modalAutoRotateInterval) {
+                    clearInterval(modalAutoRotateInterval);
+                    modalAutoRotateInterval = null;
+                }
+            }
+        }
+
         // 모달 닫기
         function closeModal() {
             const modal = document.getElementById('modal');
             modal.style.display = 'none';
+            
+            if (modalAutoRotateInterval) {
+                clearInterval(modalAutoRotateInterval);
+                modalAutoRotateInterval = null;
+                modalAutoRotate = false;
+            }
+            modalRotationX = 0;
+            modalRotationY = 0;
+            
+            const modalContent = document.getElementById('modalContent');
+            if (modalContent) {
+                modalContent.innerHTML = '';
+            }
         }
 
         // 책 전환
         function switchBook(bookType) {
-            // 버튼 상태 업데이트
             document.querySelectorAll('.book-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
             
-            // 현재 클릭된 버튼을 활성화
             if (bookType === 'friender') {
                 document.getElementById('friender-btn').classList.add('active');
             } else {
                 document.getElementById('vq-btn').classList.add('active');
             }
 
-            // 책 데이터 변경
             if (bookType === 'friender') {
                 bookData = frienderData;
             } else {
@@ -1615,14 +1661,6 @@
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-        }
-
-        // 애니메이션 정리 함수
-        function cleanupAnimation() {
-            if (animationRef) {
-                cancelAnimationFrame(animationRef);
-                animationRef = null;
-            }
         }
 
         // 초기화 실행
