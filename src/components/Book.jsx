@@ -4,7 +4,6 @@ import Model3D from "./Model3D";
 
 function Book() {
   const [currentPage, setCurrentPage] = useState(0);
-  const [isCoverVisible, setIsCoverVisible] = useState(false);
   const [isMainImageAnimating, setIsMainImageAnimating] = useState(false);
   const [mainImageSize, setMainImageSize] = useState(1);
   const [mainImageRotation, setMainImageRotation] = useState(0);
@@ -20,9 +19,6 @@ function Book() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const animationRef = useRef(null);
   const bookRef = useRef(null);
-
-  // PDF 경로 설정
-  const pdfPath = "/func-file/FrienderFile/프랜더-소개-책자.pdf";
 
   // 화려한 표지 애니메이션 함수
   const animateCover = (duration) => {
@@ -78,7 +74,7 @@ function Book() {
   useEffect(() => {
     // 페이지 로드 후 더 긴 지연을 두고 애니메이션 시작
     const timer = setTimeout(() => {
-      setIsCoverVisible(true);
+      // setIsCoverVisible(true); // Removed as per edit hint
 
       // 1초 후에 화려한 애니메이션 시작
       const animationTimer = setTimeout(() => {
@@ -489,7 +485,7 @@ function Book() {
     // 표지 페이지(0번)가 완전히 보일 때 애니메이션 활성화
     if (newPage === 0) {
       setTimeout(() => {
-        setIsCoverVisible(true);
+        // setIsCoverVisible(true); // Removed as per edit hint
         // 1초 후에 화려한 애니메이션 시작
         setTimeout(() => {
           setIsMainImageAnimating(true);
@@ -497,7 +493,7 @@ function Book() {
         }, 1000);
       }, 500);
     } else {
-      setIsCoverVisible(false);
+      // setIsCoverVisible(false); // Removed as per edit hint
       setIsMainImageAnimating(false);
       setMainImageSize(1);
       setMainImageRotation(0);
@@ -666,37 +662,37 @@ function Book() {
                       <img
                         src="/interacivefile/FrienderFile/environ-1.png"
                         alt="Environment 1"
-                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
                         onClick={(e) => handleGifClick(1, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-2.png"
                         alt="Environment 2"
-                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
                         onClick={(e) => handleGifClick(2, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-3.png"
                         alt="Environment 3"
-                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
                         onClick={(e) => handleGifClick(3, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-4.png"
                         alt="Environment 4"
-                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
                         onClick={(e) => handleGifClick(4, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-5.png"
                         alt="Environment 5"
-                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
                         onClick={(e) => handleGifClick(5, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-6.png"
                         alt="Environment 6"
-                        className="flex-1 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
                         onClick={(e) => handleGifClick(6, e)}
                       />
                     </div>
