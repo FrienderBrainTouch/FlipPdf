@@ -1,19 +1,20 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
-import Header from './components/Header';
-import Book from './components/Book';
-import VQBook from './components/VQBook';
+import React, { useState } from "react";
+import Header from "./components/Header";
+import Book from "./components/Book";
+import VQBook from "./components/VQBook";
 
 function App() {
+  const [selectedBook, setSelectedBook] = useState("friender");
+
+  const handleBookChange = (bookType) => {
+    setSelectedBook(bookType);
+  };
+
   return (
     <div className="w-full h-full flex flex-col">
-      <Header />
+      <Header selectedBook={selectedBook} onBookChange={handleBookChange} />
       <div className="flex-1 flex justify-center items-center p-2.5">
-        <Routes>
-          <Route path="/" element={<Book />} />
-          <Route path="/vq" element={<VQBook />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        {selectedBook === "friender" ? <Book /> : <VQBook />}
       </div>
     </div>
   );

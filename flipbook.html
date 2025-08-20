@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +35,7 @@
             color: white;
             font-size: 2.5rem;
             margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
 
         .book-selector {
@@ -53,7 +54,7 @@
             transition: all 0.3s ease;
             background: white;
             color: #333;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
         .book-btn.active {
@@ -65,7 +66,7 @@
 
         .book-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
         }
 
         /* 기능 버튼들 */
@@ -98,9 +99,14 @@
             color: white;
         }
 
+        .book-download-btn {
+            background: #FF9800;
+            color: white;
+        }
+
         .function-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         /* 플립북 컨테이너 */
@@ -133,7 +139,7 @@
             transform-origin: left center;
             transition: all 0.8s cubic-bezier(0.645, 0.045, 0.355, 1);
             border-radius: 5px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
 
@@ -261,12 +267,12 @@
             background: white;
             color: #333;
             transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
         .nav-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
         .nav-btn:disabled {
@@ -284,7 +290,7 @@
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.8);
+            background-color: rgba(0, 0, 0, 0.8);
             backdrop-filter: blur(5px);
         }
 
@@ -298,7 +304,7 @@
             max-height: 80vh;
             overflow: auto;
             position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
 
         .close {
@@ -409,8 +415,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* 페이지 넘김 효과 */
@@ -420,13 +431,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to right, rgba(0,0,0,0.1), transparent);
+            background: linear-gradient(to right, rgba(0, 0, 0, 0.1), transparent);
             pointer-events: none;
             z-index: 1;
         }
 
         .page.flipped .page-shadow {
-            background: linear-gradient(to left, rgba(0,0,0,0.1), transparent);
+            background: linear-gradient(to left, rgba(0, 0, 0, 0.1), transparent);
         }
 
         /* 3D 모델링 컨테이너 */
@@ -465,27 +476,32 @@
             box-sizing: border-box;
         }
 
-        .model-face.front { 
+        .model-face.front {
             background: linear-gradient(45deg, #ff6b6b, #ee5a24);
             transform: translateZ(100px);
         }
-        .model-face.back { 
+
+        .model-face.back {
             background: linear-gradient(45deg, #4834d4, #686de0);
             transform: translateZ(-100px) rotateY(180deg);
         }
-        .model-face.right { 
+
+        .model-face.right {
             background: linear-gradient(45deg, #00d2d3, #54a0ff);
             transform: translateX(100px) rotateY(90deg);
         }
-        .model-face.left { 
+
+        .model-face.left {
             background: linear-gradient(45deg, #ff9ff3, #f368e0);
             transform: translateX(-100px) rotateY(-90deg);
         }
-        .model-face.top { 
+
+        .model-face.top {
             background: linear-gradient(45deg, #26de81, #20bf6b);
             transform: translateY(-100px) rotateX(90deg);
         }
-        .model-face.bottom { 
+
+        .model-face.bottom {
             background: linear-gradient(45deg, #fd79a8, #e84393);
             transform: translateY(100px) rotateX(-90deg);
         }
@@ -517,6 +533,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <!-- 헤더 -->
@@ -529,6 +546,12 @@
 
             <!-- 기능 버튼들 -->
             <div class="function-buttons">
+                <button class="function-btn book-download-btn" id="friender-book-btn">
+                    📚 Friender 책자
+                </button>
+                <button class="function-btn book-download-btn" id="vq-book-btn">
+                    📚 VQ 책자
+                </button>
                 <button class="function-btn print-btn" id="print-btn">
                     🖨️ 프린트
                 </button>
@@ -833,7 +856,7 @@
                 interactiveElements: []
             });
         }
-        
+
         vqData.pages.push({
             id: 'last',
             image: './public/Pdf-img/VQ/24.png',
@@ -886,12 +909,19 @@
 
         // 이벤트 리스너 설정
         function setupEventListeners() {
-            document.getElementById('friender-btn').addEventListener('click', function() {
+            document.getElementById('friender-btn').addEventListener('click', function () {
                 switchBook('friender');
             });
-            
-            document.getElementById('vq-btn').addEventListener('click', function() {
+
+            document.getElementById('vq-btn').addEventListener('click', function () {
                 switchBook('vq');
+            });
+
+            document.getElementById('friender-book-btn').addEventListener('click', function () {
+                downloadBook('friender');
+            });
+            document.getElementById('vq-book-btn').addEventListener('click', function () {
+                downloadBook('vq');
             });
 
             document.getElementById('print-btn').addEventListener('click', printPDF);
@@ -900,13 +930,13 @@
             document.getElementById('nextBtn').addEventListener('click', nextPage);
             document.getElementById('closeModal').addEventListener('click', closeModal);
 
-            document.getElementById('modal').addEventListener('click', function(e) {
+            document.getElementById('modal').addEventListener('click', function (e) {
                 if (e.target === this) {
                     closeModal();
                 }
             });
 
-            document.addEventListener('keydown', function(e) {
+            document.addEventListener('keydown', function (e) {
                 if (e.key === 'ArrowLeft') {
                     previousPage();
                 } else if (e.key === 'ArrowRight') {
@@ -914,10 +944,10 @@
                 }
             });
 
-            window.addEventListener('resize', function() {
+            window.addEventListener('resize', function () {
                 const wasMobile = isMobile;
                 isMobile = window.innerWidth < 768;
-                
+
                 if (wasMobile !== isMobile) {
                     renderBook();
                 }
@@ -977,7 +1007,7 @@
 
                     const overlayDiv = document.createElement('div');
                     overlayDiv.className = 'absolute inset-0 flex items-center justify-center';
-                    
+
                     const mainImage = document.createElement('img');
                     mainImage.src = './public/interacivefile/FrienderFile/main.png';
                     mainImage.alt = 'Main';
@@ -991,21 +1021,21 @@
                     textContainer.id = 'cover-text-container';
                     textContainer.className = 'absolute';
                     textContainer.style.cssText = 'display: none; flex-direction: column; align-items: flex-start; gap: 10px; z-index: 10;';
-                    
+
                     const titleImg = document.createElement('img');
                     titleImg.src = './public/interacivefile/FrienderFile/title.png';
                     titleImg.alt = 'Title';
                     titleImg.id = 'cover-title-img';
                     titleImg.style.cssText = 'width: 256px; height: auto; opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease-out, transform 0.3s ease-out;';
                     textContainer.appendChild(titleImg);
-                    
+
                     const subtitleImg = document.createElement('img');
                     subtitleImg.src = './public/interacivefile/FrienderFile/subtitle.png';
                     subtitleImg.alt = 'Subtitle';
                     subtitleImg.id = 'cover-subtitle-img';
                     subtitleImg.style.cssText = 'width: 160px; height: auto; opacity: 0; transform: translateY(20px); transition: opacity 0.3s ease-out, transform 0.3s ease-out;';
                     textContainer.appendChild(subtitleImg);
-                    
+
                     pageContent.appendChild(textContainer);
                 } else {
                     const coverBackground = document.createElement('img');
@@ -1048,12 +1078,12 @@
                 width: `${parseFloat(baseConfig.width) * scale}%`,
                 maxWidth: `${getResponsiveImageSize(parseInt(baseConfig.maxWidth), isMobile)}px`
             };
-            
+
             if (baseConfig.top) result.top = baseConfig.top;
             if (baseConfig.left) result.left = baseConfig.left;
             if (baseConfig.bottom) result.bottom = baseConfig.bottom;
             if (baseConfig.right) result.right = baseConfig.right;
-            
+
             return result;
         }
 
@@ -1061,11 +1091,11 @@
         function createInteractiveElement(element, index) {
             const div = document.createElement('div');
             div.className = 'interactive-image';
-            
+
             const responsivePosition = getResponsiveImagePosition(element.position, isMobile);
-            
+
             div.style.position = 'absolute';
-            
+
             if (responsivePosition.top) {
                 div.style.top = responsivePosition.top;
             }
@@ -1078,7 +1108,7 @@
             if (responsivePosition.right) {
                 div.style.right = responsivePosition.right;
             }
-            
+
             div.style.width = responsivePosition.width;
             div.style.maxWidth = responsivePosition.maxWidth;
 
@@ -1104,7 +1134,7 @@
                 div.appendChild(video);
             }
 
-            div.addEventListener('click', function(e) {
+            div.addEventListener('click', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
                 if (element.clickAction === 'modal') {
@@ -1172,7 +1202,7 @@
                     } else {
                         const leftPageIndex = pageIndex * 2 - 1;
                         const rightPageIndex = leftPageIndex + 1;
-                        
+
                         if (i === leftPageIndex) {
                             pageElement.style.display = 'block';
                             pageElement.style.visibility = 'visible';
@@ -1246,18 +1276,18 @@
         // 화려한 표지 애니메이션 함수
         function animateCover(duration) {
             const startTime = performance.now();
-            
+
             const animate = (currentTime) => {
                 const elapsed = currentTime - startTime;
                 const progress = Math.min(elapsed / duration, 1);
-                
+
                 if (progress <= 0.3) {
                     const bgProgress = progress / 0.3;
                     backgroundScale = 1.2 - (0.2 * bgProgress);
                     backgroundBlur = 5 * bgProgress;
                     updateBackgroundAnimation();
                 }
-                
+
                 if (progress >= 0.2 && progress <= 0.5) {
                     const imgProgress = (progress - 0.2) / 0.3;
                     mainImageOpacity = imgProgress;
@@ -1265,31 +1295,31 @@
                     mainImageSize = 1 + (319 * imgProgress);
                     updateMainImageAnimation();
                 }
-                
+
                 if (progress >= 0.5 && progress <= 0.8) {
                     const sizeProgress = (progress - 0.5) / 0.3;
                     mainImageSize = 320 + (0 * sizeProgress);
                     mainImageRotation = 360 - (360 * sizeProgress);
                     updateMainImageAnimation();
                 }
-                
+
                 if (progress >= 0.7 && progress <= 1) {
                     const textProgress = (progress - 0.7) / 0.3;
                     titleOpacity = textProgress;
                     subtitleOpacity = textProgress;
                     updateTextAnimation();
                 }
-                
+
                 if (progress >= 1) {
                     mainImageRotation = 0;
                     updateMainImageAnimation();
                 }
-                
+
                 if (progress < 1) {
                     animationRef = requestAnimationFrame(animate);
                 }
             };
-            
+
             animationRef = requestAnimationFrame(animate);
         }
 
@@ -1306,19 +1336,19 @@
         function updateMainImageAnimation() {
             const mainImage = document.getElementById('cover-main-image');
             const textContainer = document.getElementById('cover-text-container');
-            
+
             if (mainImage) {
                 mainImage.style.width = `${mainImageSize}px`;
                 mainImage.style.height = `${mainImageSize}px`;
                 mainImage.style.opacity = mainImageOpacity;
                 mainImage.style.transform = `rotate(${mainImageRotation}deg)`;
             }
-            
+
             if (textContainer && isMainImageAnimating && mainImageSize > 50) {
                 textContainer.style.display = 'flex';
                 const containerWidth = mainImageSize * 0.8;
                 const containerHeight = mainImageSize * 0.5;
-                
+
                 textContainer.style.left = `calc(50% - ${containerWidth / 2}px)`;
                 textContainer.style.top = `calc(50% - ${containerHeight / 2}px)`;
             }
@@ -1328,14 +1358,14 @@
         function updateTextAnimation() {
             const titleImg = document.getElementById('cover-title-img');
             const subtitleImg = document.getElementById('cover-subtitle-img');
-            
+
             if (titleImg) {
                 titleImg.style.width = `${mainImageSize * 0.8}px`;
                 titleImg.style.height = 'auto';
                 titleImg.style.opacity = titleOpacity;
                 titleImg.style.transform = `translateY(${20 - (titleOpacity * 20)}px)`;
             }
-            
+
             if (subtitleImg) {
                 subtitleImg.style.width = `${mainImageSize * 0.5}px`;
                 subtitleImg.style.height = 'auto';
@@ -1463,17 +1493,17 @@
             controls.style.justifyContent = 'center';
             controls.style.display = 'flex';
             controls.style.gap = '10px';
-            
+
             const resetBtn = document.createElement('button');
             resetBtn.className = 'model-control-btn';
             resetBtn.textContent = '리셋';
             resetBtn.onclick = () => resetModal3DModel();
-            
+
             const autoRotateBtn = document.createElement('button');
             autoRotateBtn.className = 'model-control-btn';
             autoRotateBtn.textContent = '자동회전';
             autoRotateBtn.onclick = () => toggleModalAutoRotate();
-            
+
             controls.appendChild(resetBtn);
             controls.appendChild(autoRotateBtn);
             container.appendChild(controls);
@@ -1509,7 +1539,7 @@
             function startModalDrag(e) {
                 e.preventDefault();
                 isDragging = true;
-                
+
                 if (e.type === 'mousedown') {
                     startX = e.clientX;
                     startY = e.clientY;
@@ -1517,7 +1547,7 @@
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
                 }
-                
+
                 container.style.cursor = 'grabbing';
             }
 
@@ -1526,7 +1556,7 @@
                 e.preventDefault();
 
                 let currentX, currentY;
-                
+
                 if (e.type === 'mousemove') {
                     currentX = e.clientX;
                     currentY = e.clientY;
@@ -1581,7 +1611,7 @@
         function toggleModalAutoRotate() {
             modalAutoRotate = !modalAutoRotate;
             const model = document.getElementById('modal-model-3d');
-            
+
             if (modalAutoRotate) {
                 modalAutoRotateInterval = setInterval(() => {
                     modalRotationY += 2;
@@ -1601,7 +1631,7 @@
         function closeModal() {
             const modal = document.getElementById('modal');
             modal.style.display = 'none';
-            
+
             if (modalAutoRotateInterval) {
                 clearInterval(modalAutoRotateInterval);
                 modalAutoRotateInterval = null;
@@ -1609,7 +1639,7 @@
             }
             modalRotationX = 0;
             modalRotationY = 0;
-            
+
             const modalContent = document.getElementById('modalContent');
             if (modalContent) {
                 modalContent.innerHTML = '';
@@ -1621,7 +1651,7 @@
             document.querySelectorAll('.book-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+
             if (bookType === 'friender') {
                 document.getElementById('friender-btn').classList.add('active');
             } else {
@@ -1645,7 +1675,7 @@
         function printPDF() {
             const pdfUrl = bookData.pdfPath;
             const printWindow = window.open(pdfUrl, '_blank');
-            
+
             if (printWindow) {
                 printWindow.onload = () => {
                     printWindow.print();
@@ -1663,8 +1693,32 @@
             document.body.removeChild(link);
         }
 
+        // 책자 다운로드
+        function downloadBook(bookType) {
+            let pdfUrl = '';
+            let fileName = '';
+
+            if (bookType === 'friender') {
+                pdfUrl = frienderData.pdfPath;
+                fileName = frienderData.name + '.pdf';
+            } else if (bookType === 'vq') {
+                pdfUrl = vqData.pdfPath;
+                fileName = vqData.name + '.pdf';
+            }
+
+            if (pdfUrl) {
+                const link = document.createElement('a');
+                link.href = pdfUrl;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
         // 초기화 실행
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
+
 </html>

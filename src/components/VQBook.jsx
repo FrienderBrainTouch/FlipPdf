@@ -40,26 +40,6 @@ function VQBook() {
     animationRef.current = requestAnimationFrame(animate);
   };
 
-  // PDF 프린트 기능
-  const printPDF = () => {
-    const printWindow = window.open(pdfPath, "_blank");
-    if (printWindow) {
-      printWindow.onload = () => {
-        printWindow.print();
-      };
-    }
-  };
-
-  // PDF 다운로드 기능
-  const downloadPDF = () => {
-    const link = document.createElement("a");
-    link.href = pdfPath;
-    link.download = "VQ 프로젝트.pdf";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // 컴포넌트 마운트 시 표지 페이지 애니메이션 자동 실행
   useEffect(() => {
     // 페이지 로드 후 더 긴 지연을 두고 애니메이션 시작
@@ -583,22 +563,6 @@ function VQBook() {
 
   return (
     <div className="w-full h-full flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
-      {/* 기능 버튼들 */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={printPDF}
-          className="px-4 py-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
-        >
-          🖨️ 프린트
-        </button>
-        <button
-          onClick={downloadPDF}
-          className="px-4 py-2 bg-green-500 text-white rounded-full hover:bg-green-600 transition-all duration-300 hover:scale-105 shadow-lg flex items-center gap-2"
-        >
-          📥 PDF 다운로드
-        </button>
-      </div>
-
       {/* 플립북 컨테이너 */}
       <div className="flex justify-center items-center perspective-1000">
         <HTMLFlipBook
