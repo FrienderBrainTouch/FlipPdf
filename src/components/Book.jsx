@@ -101,7 +101,7 @@ function Book() {
   // 윈도우 크기 변경 감지
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 576);
     };
 
     window.addEventListener("resize", handleResize);
