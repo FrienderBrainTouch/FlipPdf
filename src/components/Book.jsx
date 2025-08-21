@@ -2,25 +2,88 @@ import React, { useState, useEffect, useRef } from "react";
 import HTMLFlipBook from "react-pageflip";
 import Model3D from "./Model3D";
 
+/**
+ * Friender 프로젝트 플립북 컴포넌트
+ * 
+ * 이 컴포넌트는 Friender 프로젝트의 인터랙티브 플립북을 구현합니다.
+ * 주요 기능:
+ * - PDF 페이지를 플립북 형태로 표시
+ * - 표지 페이지의 화려한 애니메이션 효과
+ * - 인터랙티브 이미지와 GIF 클릭 시 모달 표시
+ * - 3D 모델 뷰어 연동
+ * - 반응형 디자인 지원
+ * - 키보드 및 터치 네비게이션
+ */
 function Book() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isMainImageAnimating, setIsMainImageAnimating] = useState(false);
-  const [mainImageSize, setMainImageSize] = useState(1);
-  const [mainImageRotation, setMainImageRotation] = useState(0);
-  const [mainImageOpacity, setMainImageOpacity] = useState(0);
-  const [titleOpacity, setTitleOpacity] = useState(0);
-  const [subtitleOpacity, setSubtitleOpacity] = useState(0);
-  const [backgroundScale, setBackgroundScale] = useState(1.2);
-  const [backgroundBlur, setBackgroundBlur] = useState(0);
-  const [selectedGif, setSelectedGif] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalSourcePage, setModalSourcePage] = useState(null);
-  const [is3DModalOpen, setIs3DModalOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
-  const animationRef = useRef(null);
-  const bookRef = useRef(null);
+  // 상태 관리 변수들
+  const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 번호
+  const [isMainImageAnimating, setIsMainImageAnimating] = useState(false); // 메인 이미지 애니메이션 상태
+  const [mainImageSize, setMainImageSize] = useState(1); // 메인 이미지 크기
+  const [mainImageRotation, setMainImageRotation] = useState(0); // 메인 이미지 회전 각도
+  const [mainImageOpacity, setMainImageOpacity] = useState(0); // 메인 이미지 투명도
+  const [titleOpacity, setTitleOpacity] = useState(0); // 타이틀 투명도
+  const [subtitleOpacity, setSubtitleOpacity] = useState(0); // 서브타이틀 투명도
+  const [backgroundScale, setBackgroundScale] = useState(1.2); // 배경 이미지 스케일
+  const [backgroundBlur, setBackgroundBlur] = useState(0); // 배경 이미지 블러 효과
+  const [selectedGif, setSelectedGif] = useState(null); // 선택된 GIF 파일
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 상태
+  const [modalSourcePage, setModalSourcePage] = useState(null); // 모달을 연 페이지
+  const [is3DModalOpen, setIs3DModalOpen] = useState(false); // 3D 모달 열림 상태
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 576); // 모바일 여부
+  const [isBookReady, setIsBookReady] = useState(false); // 플립북 준비 상태
+  const [isFlipping, setIsFlipping] = useState(false); // 페이지 전환 중 상태
 
-  // 화려한 표지 애니메이션 함수
+  // ref 변수들
+  const animationRef = useRef(null); // 애니메이션 프레임 참조
+  const bookRef = useRef(null); // 플립북 컴포넌트 참조
+  const flipTimeoutRef = useRef(null); // 페이지 전환 타임아웃 참조
+  const isFlippingRef = useRef(false); // ref로 flipping 상태 추적 (성능 최적화)
+
+  /**
+   * 플립북 준비 상태 확인 useEffect
+   * bookRef가 준비되면 isBookReady 상태를 true로 설정
+   */
+  useEffect(() => {
+    let isMounted = true;
+    
+    const checkBookReady = () => {
+      if (!isMounted) return;
+      
+      if (bookRef.current && bookRef.current.pageFlip) {
+        if (!isBookReady) {
+          setIsBookReady(true);
+        }
+        return true; // 준비 완료
+      } else {
+        if (isBookReady) {
+          setIsBookReady(false);
+        }
+        return false; // 아직 준비 안됨
+      }
+    };
+
+    // 초기 체크
+    if (checkBookReady()) {
+      return; // 이미 준비된 경우 interval 불필요
+    }
+    
+    // 주기적으로 체크 (bookRef가 늦게 준비될 수 있음)
+    const interval = setInterval(() => {
+      if (checkBookReady()) {
+        clearInterval(interval); // 준비 완료되면 interval 정리
+      }
+    }, 100);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []); // isBookReady 의존성 제거
+
+  /**
+   * 화려한 표지 애니메이션 함수
+   * @param {number} duration - 애니메이션 지속 시간 (밀리초)
+   */
   const animateCover = (duration) => {
     const startTime = performance.now();
 
@@ -70,12 +133,13 @@ function Book() {
     animationRef.current = requestAnimationFrame(animate);
   };
 
-  // 컴포넌트 마운트 시 표지 페이지 애니메이션 자동 실행
+  /**
+   * 컴포넌트 마운트 시 표지 페이지 애니메이션 자동 실행
+   * 페이지 로드 후 1초 지연 후 애니메이션 시작
+   */
   useEffect(() => {
     // 페이지 로드 후 더 긴 지연을 두고 애니메이션 시작
     const timer = setTimeout(() => {
-      // setIsCoverVisible(true); // Removed as per edit hint
-
       // 1초 후에 화려한 애니메이션 시작
       const animationTimer = setTimeout(() => {
         setIsMainImageAnimating(true);
@@ -89,16 +153,26 @@ function Book() {
     return () => clearTimeout(timer);
   }, []);
 
-  // 컴포넌트 언마운트 시 애니메이션 정리
+  /**
+   * 컴포넌트 언마운트 시 애니메이션 정리
+   * 메모리 누수 방지를 위한 cleanup 함수
+   */
   useEffect(() => {
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      if (flipTimeoutRef.current) {
+        clearTimeout(flipTimeoutRef.current);
+      }
+      isFlippingRef.current = false;
     };
   }, []);
 
-  // 윈도우 크기 변경 감지
+  /**
+   * 윈도우 크기 변경 감지
+   * 모바일/데스크톱 전환 시 반응형 처리
+   */
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 576);
@@ -108,16 +182,19 @@ function Book() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 키보드 이벤트 처리
+  /**
+   * 키보드 이벤트 처리
+   * 좌우 화살표 키로 페이지 이동
+   */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") {
-        if (bookRef.current && currentPage > 0) {
-          bookRef.current.pageFlip().flip(currentPage - 1);
+        if (currentPage > 0) {
+          safePageFlip(currentPage - 1);
         }
       } else if (e.key === "ArrowRight") {
-        if (bookRef.current && currentPage < 7) {
-          bookRef.current.pageFlip().flip(currentPage + 1);
+        if (currentPage < 7) {
+          safePageFlip(currentPage + 1);
         }
       }
     };
@@ -126,6 +203,7 @@ function Book() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [currentPage]);
 
+  // Friender 프로젝트 페이지 데이터
   const frienderData = [
     {
       id: "2",
@@ -164,7 +242,37 @@ function Book() {
     },
   ];
 
-  // gif 파일 매핑
+  // 페이지 묶음 정보 (2장씩 보여지는 구조)
+  const pageGroups = [
+    { groupId: 1, pages: [0], description: "표지" },
+    { groupId: 2, pages: [1, 2], description: "1-2장" },
+    { groupId: 3, pages: [3, 4], description: "3-4장" },
+    { groupId: 4, pages: [5, 6], description: "5-6장" },
+    { groupId: 5, pages: [7], description: "마지막" }
+  ];
+
+  /**
+   * 현재 페이지가 속한 그룹 찾기
+   * @param {number} page - 페이지 번호
+   * @returns {Object} 페이지 그룹 정보
+   */
+  const getCurrentGroup = (page) => {
+    return pageGroups.find(group => group.pages.includes(page)) || pageGroups[0];
+  };
+
+  /**
+   * 페이지 그룹으로 이동하는 함수
+   * @param {number} groupId - 이동할 그룹 ID
+   */
+  const goToGroup = (groupId) => {
+    const targetGroup = pageGroups.find(group => group.groupId === groupId);
+    if (targetGroup && targetGroup.pages.length > 0) {
+      // 그룹의 첫 번째 페이지로 이동
+      safePageFlip(targetGroup.pages[0]);
+    }
+  };
+
+  // GIF 파일 매핑 (환경 관련 애니메이션)
   const gifMapping = {
     1: "/interacivefile/FrienderFile/1-탄소-중립을-통해-지구촌-기후변화를-예방.gif",
     2: "/interacivefile/FrienderFile/2-친환경-에너지-자립마을-만들기.gif",
@@ -174,7 +282,7 @@ function Book() {
     6: "/interacivefile/FrienderFile/6-해양-오염-구조-탐사대-체험.gif",
   };
 
-  // section-img 이미지 매핑 (페이지별)
+  // section-img 이미지 매핑 (페이지별 상세 이미지)
   const sectionImgMapping = {
     2: [
       "/interacivefile/FrienderFile/section-img/2-1.png",
@@ -212,7 +320,7 @@ function Book() {
     8: ["/interacivefile/FrienderFile/section-img/8-1.png"],
   };
 
-  // 페이지별 개별 이미지 위치 설정
+  // 페이지별 개별 이미지 위치 설정 (절대 위치)
   const individualImagePositions = {
     2: [
       {
@@ -406,7 +514,12 @@ function Book() {
     ],
   };
 
-  // gif 클릭 핸들러
+  /**
+   * GIF 클릭 핸들러
+   * 환경 관련 애니메이션 GIF를 클릭하면 모달로 표시
+   * @param {number} gifNumber - GIF 번호
+   * @param {Event} event - 클릭 이벤트
+   */
   const handleGifClick = (gifNumber, event) => {
     event.stopPropagation(); // 이벤트 전파 방지
     setSelectedGif(gifMapping[gifNumber]);
@@ -415,7 +528,14 @@ function Book() {
     setIsModalOpen(true);
   };
 
-  // section-img 클릭 핸들러
+  /**
+   * section-img 클릭 핸들러
+   * 페이지별 상세 이미지를 클릭하면 모달로 표시
+   * 특정 이미지(3-3.png)는 3D 모델로 표시
+   * @param {string} imgSrc - 이미지 경로
+   * @param {Event} event - 클릭 이벤트
+   * @param {string} pageId - 페이지 ID
+   */
   const handleSectionImgClick = (imgSrc, event, pageId) => {
     event.stopPropagation(); // 이벤트 전파 방지
 
@@ -429,28 +549,35 @@ function Book() {
     }
   };
 
-  // 모달 닫기 핸들러
+  /**
+   * 모달 닫기 핸들러
+   * 모달이 닫힐 때 해당 페이지로 이동
+   */
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedGif(null);
 
     // 모달이 닫힐 때 해당 페이지로 이동
-    if (modalSourcePage !== null && bookRef.current) {
+    if (modalSourcePage !== null) {
       setTimeout(() => {
         // 페이지 ID를 인덱스로 변환 (표지 페이지는 0, 나머지는 ID-1)
         const pageIndex = modalSourcePage === 1 ? 0 : modalSourcePage - 1;
-        bookRef.current.pageFlip().flip(pageIndex);
+        safePageFlip(pageIndex);
       }, 100);
     }
     setModalSourcePage(null);
   };
 
-  // 3D 모달 열기
+  /**
+   * 3D 모달 열기
+   */
   const open3DModal = () => {
     setIs3DModalOpen(true);
   };
 
-  // 3D 모달 닫기
+  /**
+   * 3D 모달 닫기
+   */
   const close3DModal = () => {
     setIs3DModalOpen(false);
   };
@@ -459,12 +586,22 @@ function Book() {
   const bookWidth = isMobile ? 320 : 370;
   const bookHeight = isMobile ? 450 : 500;
 
-  // 반응형 이미지 크기 계산 함수
+  /**
+   * 반응형 이미지 크기 계산 함수
+   * @param {number} baseSize - 기본 크기
+   * @param {boolean} isMobile - 모바일 여부
+   * @returns {number} 조정된 크기
+   */
   const getResponsiveImageSize = (baseSize, isMobile) => {
     return isMobile ? baseSize * 0.8 : baseSize;
   };
 
-  // 반응형 이미지 위치 계산 함수
+  /**
+   * 반응형 이미지 위치 계산 함수
+   * @param {Object} baseConfig - 기본 위치 설정
+   * @param {boolean} isMobile - 모바일 여부
+   * @returns {Object} 조정된 위치 설정
+   */
   const getResponsiveImagePosition = (baseConfig, isMobile) => {
     const scale = isMobile ? 0.9 : 1;
     return {
@@ -477,15 +614,28 @@ function Book() {
     };
   };
 
-  // 페이지 변경 감지
+  /**
+   * 페이지 변경 감지
+   * 플립북의 페이지가 변경될 때 호출되는 콜백
+   * @param {Object} e - 페이지 변경 이벤트
+   */
   const handlePageChange = (e) => {
     const newPage = e.data;
+    
+    // 현재 페이지와 동일한 경우 업데이트하지 않음
+    if (newPage === currentPage) {
+      return;
+    }
+    
     setCurrentPage(newPage);
+    
+    // 페이지 전환 완료 시 flipping 상태 리셋
+    isFlippingRef.current = false;
+    setIsFlipping(false);
 
     // 표지 페이지(0번)가 완전히 보일 때 애니메이션 활성화
     if (newPage === 0) {
       setTimeout(() => {
-        // setIsCoverVisible(true); // Removed as per edit hint
         // 1초 후에 화려한 애니메이션 시작
         setTimeout(() => {
           setIsMainImageAnimating(true);
@@ -493,7 +643,6 @@ function Book() {
         }, 1000);
       }, 500);
     } else {
-      // setIsCoverVisible(false); // Removed as per edit hint
       setIsMainImageAnimating(false);
       setMainImageSize(1);
       setMainImageRotation(0);
@@ -506,6 +655,108 @@ function Book() {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+    }
+  };
+
+  /**
+   * 안전한 페이지 전환 함수
+   * 중복 호출 방지 및 오류 처리
+   * @param {number} targetPage - 이동할 페이지 번호
+   */
+  const safePageFlip = (targetPage) => {
+    if (!isBookReady) {
+      return;
+    }
+    
+    // 이미 페이지 전환 중인 경우 무시
+    if (isFlippingRef.current) {
+      return;
+    }
+    
+    // 이미 해당 페이지에 있는 경우 전환하지 않음
+    if (currentPage === targetPage) {
+      return;
+    }
+    
+    // 즉시 flipping 상태 설정 (중복 호출 방지)
+    isFlippingRef.current = true;
+    setIsFlipping(true);
+    
+    // 이전 타임아웃 정리
+    if (flipTimeoutRef.current) {
+      clearTimeout(flipTimeoutRef.current);
+    }
+    
+    // 디바운싱: 300ms 후에 실제 페이지 전환 실행
+    flipTimeoutRef.current = setTimeout(() => {
+      if (bookRef.current) {
+        try {
+          // HTMLFlipBook의 다양한 페이지 전환 메서드 시도
+          if (bookRef.current.pageFlip) {
+            const pageFlip = bookRef.current.pageFlip();
+            
+            // 다양한 페이지 전환 방법 시도
+            if (pageFlip && typeof pageFlip.flip === 'function') {
+              // 방법 1: 직접 flip 메서드
+              pageFlip.flip(targetPage);
+            } else if (pageFlip && typeof pageFlip.flipToPage === 'function') {
+              // 방법 2: flipToPage 메서드 (일부 버전에서 지원)
+              pageFlip.flipToPage(targetPage);
+            } else if (pageFlip && typeof pageFlip.goToPage === 'function') {
+              // 방법 3: goToPage 메서드 (일부 버전에서 지원)
+              pageFlip.goToPage(targetPage);
+            } else if (pageFlip && typeof pageFlip.turnToPage === 'function') {
+              // 방법 4: turnToPage 메서드 (일부 버전에서 지원)
+              pageFlip.turnToPage(targetPage);
+            } else if (pageFlip && typeof pageFlip.setPage === 'function') {
+              // 방법 5: setPage 메서드 (일부 버전에서 지원)
+              pageFlip.setPage(targetPage);
+            } else {
+              // fallback: currentPage만 업데이트
+              setCurrentPage(targetPage);
+              isFlippingRef.current = false;
+              setIsFlipping(false);
+            }
+          } else if (bookRef.current.flip) {
+            // 직접 flip 메서드가 있는 경우
+            bookRef.current.flip(targetPage);
+          } else if (bookRef.current.goToPage) {
+            // goToPage 메서드가 있는 경우
+            bookRef.current.goToPage(targetPage);
+          } else {
+            // fallback: currentPage만 업데이트
+            setCurrentPage(targetPage);
+            isFlippingRef.current = false;
+            setIsFlipping(false);
+          }
+        } catch (error) {
+          // 오류 발생 시 currentPage만 업데이트
+          setCurrentPage(targetPage);
+          isFlippingRef.current = false;
+          setIsFlipping(false);
+        }
+      } else {
+        isFlippingRef.current = false;
+        setIsFlipping(false);
+      }
+    }, 300);
+  };
+
+  /**
+   * 이전 페이지로 이동
+   */
+  const goToPreviousPage = () => {
+    if (currentPage > 0) {
+      safePageFlip(currentPage - 1);
+    }
+  };
+
+  /**
+   * 다음 페이지로 이동
+   */
+  const goToNextPage = () => {
+    if (currentPage < 7) {
+      safePageFlip(currentPage + 1);
     }
   };
 
@@ -524,6 +775,8 @@ function Book() {
           showPageCorners={false}
           size="fixed"
           onFlip={handlePageChange}
+          onFlipStart={(e) => {}}
+          onFlipEnd={(e) => {}}
           usePortrait={isMobile}
           useMouseEvents={true}
           swipeDistance={50}
@@ -609,6 +862,7 @@ function Book() {
             </div>
           </div>
 
+          {/* 내부 페이지들 */}
           {frienderData.map((page, index) => (
             <div
               key={page.id}
@@ -616,6 +870,7 @@ function Book() {
             >
               <div className="w-full h-full flex flex-col justify-center items-center p-0">
                 <div className="w-full h-full relative">
+                  {/* 페이지 배경 이미지 */}
                   <img
                     src={`/Pdf-img/Friender/${page.id}.jpg`}
                     alt={page.name}
@@ -730,25 +985,73 @@ function Book() {
       </div>
 
       {/* 네비게이션 */}
-      <div className="flex justify-center gap-5 mt-6">
-        <button
-          onClick={() => bookRef.current?.pageFlip().flip(currentPage - 1)}
-          disabled={currentPage === 0}
-          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          ◀ 이전
-        </button>
-        <span className="px-4 py-2 text-white font-bold">
-          {currentPage + 1} / 8
-        </span>
-        <button
-          onClick={() => bookRef.current?.pageFlip().flip(currentPage + 1)}
-          disabled={currentPage === 7}
-          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          다음 ▶
-        </button>
+      <div className="flex flex-col items-center gap-4 mt-6">
+        {/* 페이지 그룹 네비게이션 */}
+        <div className="flex justify-center gap-2 flex-wrap">
+          {pageGroups.map((group) => {
+            const currentGroup = getCurrentGroup(currentPage);
+            const isActive = currentGroup.groupId === group.groupId;
+            return (
+              <button
+                key={group.groupId}
+                onClick={() => goToGroup(group.groupId)}
+                className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 shadow-lg ${
+                  isActive
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+                title={`${group.description} (페이지 ${group.pages.map(p => p + 1).join(', ')})`}
+              >
+                {group.groupId}
+              </button>
+            );
+          })}
+        </div>
+        
+        {/* 현재 그룹 정보 표시 */}
+        <div className="text-white text-center">
+          <div className="text-sm opacity-75">
+            페이지 {currentPage + 1} / 8
+          </div>
+        </div>
+        
+        {/* 이전/다음 그룹 버튼 */}
+        <div className="flex justify-center gap-5">
+          <button
+            onClick={() => {
+              const currentGroup = getCurrentGroup(currentPage);
+              const prevGroup = pageGroups.find(g => g.groupId === currentGroup.groupId - 1);
+              if (prevGroup) {
+                goToGroup(prevGroup.groupId);
+              }
+            }}
+            disabled={getCurrentGroup(currentPage).groupId === 1}
+            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            ◀ 이전
+          </button>
+          <button
+            onClick={() => {
+              const currentGroup = getCurrentGroup(currentPage);
+              const nextGroup = pageGroups.find(g => g.groupId === currentGroup.groupId + 1);
+              if (nextGroup) {
+                goToGroup(nextGroup.groupId);
+              }
+            }}
+            disabled={getCurrentGroup(currentPage).groupId === pageGroups.length}
+            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            다음 ▶
+          </button>
+        </div>
       </div>
+      
+      {/* Book 준비 상태 표시 */}
+      {!isBookReady && (
+        <div className="mt-2 text-white text-sm opacity-75">
+          책을 불러오는 중... 잠시만 기다려주세요.
+        </div>
+      )}
 
       {/* 개선된 Gif 모달 */}
       {isModalOpen && selectedGif && (

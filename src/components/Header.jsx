@@ -1,7 +1,20 @@
 import React from "react";
 
+/**
+ * 헤더 컴포넌트
+ * 
+ * 이 컴포넌트는 플립북 애플리케이션의 상단 헤더를 구현합니다.
+ * 주요 기능:
+ * - Friender와 VQ 프로젝트 간 전환
+ * - 현재 선택된 프로젝트 정보 표시
+ * - PDF 프린트 및 다운로드 기능
+ * - 반응형 디자인 지원
+ */
 function Header({ selectedBook, onBookChange }) {
-  // 현재 선택된 책 PDF 다운로드 함수
+  /**
+   * 현재 선택된 책 PDF 다운로드 함수
+   * 선택된 프로젝트에 따라 적절한 PDF 파일을 다운로드
+   */
   const handleDownloadCurrentPDF = () => {
     const link = document.createElement("a");
     if (selectedBook === "friender") {
@@ -16,7 +29,10 @@ function Header({ selectedBook, onBookChange }) {
     document.body.removeChild(link);
   };
 
-  // 현재 선택된 책 PDF 프린트 함수
+  /**
+   * 현재 선택된 책 PDF 프린트 함수
+   * 새 창에서 PDF를 열고 자동으로 프린트 다이얼로그 표시
+   */
   const handlePrintCurrentPDF = () => {
     const pdfUrl =
       selectedBook === "friender"
@@ -30,6 +46,7 @@ function Header({ selectedBook, onBookChange }) {
         pdfWindow.print();
       };
 
+      // PDF 로딩 상태 확인을 위한 인터벌 설정
       const checkPdfLoaded = setInterval(() => {
         try {
           if (pdfWindow.document.readyState === "complete") {
@@ -44,6 +61,7 @@ function Header({ selectedBook, onBookChange }) {
         }
       }, 100);
 
+      // 10초 후 인터벌 정리 (타임아웃)
       setTimeout(() => {
         clearInterval(checkPdfLoaded);
       }, 10000);
@@ -54,6 +72,7 @@ function Header({ selectedBook, onBookChange }) {
     <header className="w-full py-4 px-6 flex flex-col items-center gap-4">
       {/* 책자 선택 버튼들 */}
       <div className="flex gap-3">
+        {/* Friender 프로젝트 선택 버튼 */}
         <button
           onClick={() => onBookChange("friender")}
           className={`px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 ${
@@ -65,6 +84,8 @@ function Header({ selectedBook, onBookChange }) {
         >
           📚 Friender
         </button>
+        
+        {/* VQ 프로젝트 선택 버튼 */}
         <button
           onClick={() => onBookChange("vq")}
           className={`px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 ${
@@ -86,6 +107,7 @@ function Header({ selectedBook, onBookChange }) {
 
       {/* 기능 버튼들 */}
       <div className="flex gap-3">
+        {/* 프린트 버튼 */}
         <button
           onClick={handlePrintCurrentPDF}
           className="p-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors duration-200"
@@ -107,6 +129,8 @@ function Header({ selectedBook, onBookChange }) {
             />
           </svg>
         </button>
+        
+        {/* 다운로드 버튼 */}
         <button
           onClick={handleDownloadCurrentPDF}
           className="p-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors duration-200"

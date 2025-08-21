@@ -1,16 +1,32 @@
 import React, { useState, useEffect, useRef } from "react";
 
+/**
+ * 3D 모델 뷰어 컴포넌트
+ * 
+ * 이 컴포넌트는 3D 모델을 인터랙티브하게 표시하는 뷰어를 구현합니다.
+ * 주요 기능:
+ * - 마우스/터치 드래그로 3D 모델 회전
+ * - 자동 회전 기능
+ * - 반응형 3D 렌더링
+ * - 모바일 터치 지원
+ */
 function Model3D({ onClose }) {
-  const [rotationX, setRotationX] = useState(0);
-  const [rotationY, setRotationY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0);
-  const [autoRotate, setAutoRotate] = useState(false);
-  const autoRotateInterval = useRef(null);
-  const containerRef = useRef(null);
+  // 상태 관리 변수들
+  const [rotationX, setRotationX] = useState(0); // X축 회전 각도
+  const [rotationY, setRotationY] = useState(0); // Y축 회전 각도
+  const [isDragging, setIsDragging] = useState(false); // 드래그 중 상태
+  const [startX, setStartX] = useState(0); // 드래그 시작 X 좌표
+  const [startY, setStartY] = useState(0); // 드래그 시작 Y 좌표
+  const [autoRotate, setAutoRotate] = useState(false); // 자동 회전 상태
 
-  // 자동 회전 효과
+  // ref 변수들
+  const autoRotateInterval = useRef(null); // 자동 회전 인터벌 참조
+  const containerRef = useRef(null); // 컨테이너 DOM 참조
+
+  /**
+   * 자동 회전 효과 useEffect
+   * autoRotate가 true일 때 Y축을 기준으로 자동 회전
+   */
   useEffect(() => {
     if (autoRotate) {
       autoRotateInterval.current = setInterval(() => {
@@ -30,88 +46,152 @@ function Model3D({ onClose }) {
     };
   }, [autoRotate]);
 
-  // 마우스/터치 이벤트 처리
+  /**
+   * 마우스/터치 이벤트 처리
+   * 드래그 시작 시 초기 좌표 설정
+   * @param {Event} e - 마우스/터치 이벤트
+   */
   const handleMouseDown = (e) => {
-    e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     setIsDragging(true);
     setStartX(e.clientX);
     setStartY(e.clientY);
   };
 
+  /**
+   * 마우스/터치 이동 이벤트 처리
+   * 드래그 중일 때 3D 모델 회전 계산
+   * @param {Event} e - 마우스/터치 이벤트
+   */
   const handleMouseMove = (e) => {
     if (!isDragging) return;
-    e.preventDefault();
+    
+    if (e.cancelable) {
+      e.preventDefault();
+    }
 
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
 
+    // Y축 회전 (좌우 드래그)
     setRotationY((prev) => prev + deltaX * 0.5);
+    // X축 회전 (상하 드래그) - -90도에서 90도로 제한
     setRotationX((prev) => Math.max(-90, Math.min(90, prev - deltaY * 0.5)));
 
+    // 현재 좌표를 다음 계산을 위한 시작 좌표로 설정
     setStartX(e.clientX);
     setStartY(e.clientY);
   };
 
+  /**
+   * 마우스/터치 이벤트 종료 처리
+   * 드래그 상태 해제
+   */
   const handleMouseUp = () => {
     setIsDragging(false);
   };
 
-  // 터치 이벤트 처리
+  /**
+   * 터치 이벤트 시작 처리
+   * 모바일에서 터치 시작 시 초기 좌표 설정
+   * @param {TouchEvent} e - 터치 이벤트
+   */
   const handleTouchStart = (e) => {
-    e.preventDefault();
+    if (e.cancelable) {
+      e.preventDefault();
+    }
     setIsDragging(true);
     setStartX(e.touches[0].clientX);
     setStartY(e.touches[0].clientY);
   };
 
+  /**
+   * 터치 이동 이벤트 처리
+   * 모바일에서 터치 드래그 시 3D 모델 회전 계산
+   * @param {TouchEvent} e - 터치 이벤트
+   */
   const handleTouchMove = (e) => {
     if (!isDragging) return;
-    e.preventDefault();
+    
+    if (e.cancelable) {
+      e.preventDefault();
+    }
 
     const deltaX = e.touches[0].clientX - startX;
     const deltaY = e.touches[0].clientY - startY;
 
+    // Y축 회전 (좌우 드래그)
     setRotationY((prev) => prev + deltaX * 0.5);
+    // X축 회전 (상하 드래그) - -90도에서 90도로 제한
     setRotationX((prev) => Math.max(-90, Math.min(90, prev - deltaY * 0.5)));
 
+    // 현재 좌표를 다음 계산을 위한 시작 좌표로 설정
     setStartX(e.touches[0].clientX);
     setStartY(e.touches[0].clientY);
   };
 
+  /**
+   * 터치 이벤트 종료 처리
+   * 터치 드래그 상태 해제
+   */
   const handleTouchEnd = () => {
     setIsDragging(false);
   };
 
-  // 리셋 함수
+  /**
+   * 3D 모델 리셋 함수
+   * 회전 각도를 0도로 초기화하고 자동 회전 중지
+   */
   const resetModel = () => {
     setRotationX(0);
     setRotationY(0);
     setAutoRotate(false);
   };
 
-  // 자동 회전 토글
+  /**
+   * 자동 회전 토글 함수
+   * 자동 회전 상태를 반전시킴
+   */
   const toggleAutoRotate = () => {
     setAutoRotate(!autoRotate);
   };
 
-  // 전역 마우스/터치 이벤트 리스너
+  /**
+   * 전역 마우스/터치 이벤트 리스너 설정
+   * 드래그 중일 때 문서 전체에서 이벤트 감지
+   */
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("touchmove", handleTouchMove, { passive: false });
-    document.addEventListener("touchend", handleTouchEnd);
+    
+    // 터치 이벤트를 더 안전하게 설정
+    const touchMoveHandler = (e) => handleTouchMove(e);
+    const touchEndHandler = (e) => handleTouchEnd(e);
+    
+    document.addEventListener("touchmove", touchMoveHandler, { 
+      passive: false, 
+      capture: true 
+    });
+    document.addEventListener("touchend", touchEndHandler, { 
+      passive: true 
+    });
 
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
-      document.removeEventListener("touchmove", handleTouchMove);
-      document.removeEventListener("touchend", handleTouchEnd);
+      document.removeEventListener("touchmove", touchMoveHandler, { 
+        capture: true 
+      });
+      document.removeEventListener("touchend", touchEndHandler);
     };
   }, [isDragging, startX, startY]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-80 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="bg-white rounded-2xl p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-auto relative">
+        {/* 닫기 버튼 */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-3xl font-bold text-gray-600 hover:text-black transition-colors"
@@ -119,6 +199,7 @@ function Model3D({ onClose }) {
           ×
         </button>
 
+        {/* 제목 및 설명 */}
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
             3D 모델 뷰어
@@ -128,14 +209,19 @@ function Model3D({ onClose }) {
           </p>
         </div>
 
+        {/* 3D 모델 컨테이너 */}
         <div className="flex justify-center mb-6">
           <div
             ref={containerRef}
             className="w-96 h-96 perspective-1000 cursor-grab active:cursor-grabbing"
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
-            style={{ perspective: "1000px" }}
+            style={{ 
+              perspective: "1000px",
+              touchAction: "none" // 모바일에서 스크롤 방지
+            }}
           >
+            {/* 3D 모델 래퍼 */}
             <div
               className="w-full h-full transform-style-preserve-3d transition-transform duration-300"
               style={{
@@ -143,7 +229,7 @@ function Model3D({ onClose }) {
                 transform: `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`,
               }}
             >
-              {/* 3D 모델의 각 면 */}
+              {/* 3D 모델의 각 면 - 정면 */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
@@ -154,6 +240,7 @@ function Model3D({ onClose }) {
                 3D 모델
               </div>
 
+              {/* 3D 모델의 각 면 - 뒤면 */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
@@ -164,6 +251,7 @@ function Model3D({ onClose }) {
                 뒤면
               </div>
 
+              {/* 3D 모델의 각 면 - 오른쪽 */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
@@ -174,6 +262,7 @@ function Model3D({ onClose }) {
                 오른쪽
               </div>
 
+              {/* 3D 모델의 각 면 - 왼쪽 */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
@@ -184,6 +273,7 @@ function Model3D({ onClose }) {
                 왼쪽
               </div>
 
+              {/* 3D 모델의 각 면 - 위쪽 */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
@@ -194,6 +284,7 @@ function Model3D({ onClose }) {
                 위쪽
               </div>
 
+              {/* 3D 모델의 각 면 - 아래쪽 */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
@@ -209,6 +300,7 @@ function Model3D({ onClose }) {
 
         {/* 컨트롤 버튼들 */}
         <div className="flex justify-center gap-4">
+          {/* 리셋 버튼 */}
           <button
             onClick={resetModel}
             className="px-6 py-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors font-medium"
@@ -216,6 +308,7 @@ function Model3D({ onClose }) {
             🔄 리셋
           </button>
 
+          {/* 자동회전 토글 버튼 */}
           <button
             onClick={toggleAutoRotate}
             className={`px-6 py-3 rounded-full transition-colors font-medium ${
@@ -228,6 +321,7 @@ function Model3D({ onClose }) {
           </button>
         </div>
 
+        {/* 사용법 안내 */}
         <div className="text-center mt-4 text-sm text-gray-500">
           <p>마우스 드래그: 회전 | 터치: 모바일에서도 동일하게 작동</p>
         </div>

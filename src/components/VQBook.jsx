@@ -2,23 +2,88 @@ import React, { useState, useEffect, useRef } from "react";
 import HTMLFlipBook from "react-pageflip";
 import Model3D from "./Model3D";
 
+/**
+ * VQ 프로젝트 플립북 컴포넌트
+ * 
+ * 이 컴포넌트는 VQ 프로젝트의 인터랙티브 플립북을 구현합니다.
+ * 주요 기능:
+ * - PDF 페이지를 플립북 형태로 표시
+ * - 표지 페이지의 애니메이션 효과
+ * - 인터랙티브 이미지와 비디오 클릭 시 모달 표시
+ * - 3D 모델 뷰어 연동
+ * - 반응형 디자인 지원
+ * - 키보드 및 터치 네비게이션
+ */
 function VQBook() {
-  const [currentPage, setCurrentPage] = useState(0);
-  const [isCoverVisible, setIsCoverVisible] = useState(false);
-  const [isMainImageAnimating, setIsMainImageAnimating] = useState(false);
-  const [mainImageSize, setMainImageSize] = useState(1);
-  const [selectedGif, setSelectedGif] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalSourcePage, setModalSourcePage] = useState(null);
-  const [is3DModalOpen, setIs3DModalOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
-  const animationRef = useRef(null);
-  const bookRef = useRef(null);
+  // 상태 관리 변수들
+  const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 번호
+  const [isCoverVisible, setIsCoverVisible] = useState(false); // 표지 표시 상태
+  const [isMainImageAnimating, setIsMainImageAnimating] = useState(false); // 메인 이미지 애니메이션 상태
+  const [mainImageSize, setMainImageSize] = useState(1); // 메인 이미지 크기
+  const [selectedGif, setSelectedGif] = useState(null); // 선택된 미디어 파일
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 상태
+  const [modalSourcePage, setModalSourcePage] = useState(null); // 모달을 연 페이지
+  const [is3DModalOpen, setIs3DModalOpen] = useState(false); // 3D 모달 열림 상태
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 576); // 모바일 여부
+  const [isBookReady, setIsBookReady] = useState(false); // 플립북 준비 상태
+  const [isFlipping, setIsFlipping] = useState(false); // 페이지 전환 중 상태
+
+  // ref 변수들
+  const animationRef = useRef(null); // 애니메이션 프레임 참조
+  const bookRef = useRef(null); // 플립북 컴포넌트 참조
+  const flipTimeoutRef = useRef(null); // 페이지 전환 타임아웃 참조
+  const isFlippingRef = useRef(false); // ref로 flipping 상태 추적 (성능 최적화)
 
   // PDF 경로 설정
   const pdfPath = "/func-file/VQFile/(주)브이큐스튜디오_소개 카달로그.pdf";
 
-  // main 이미지 애니메이션 함수
+  /**
+   * 플립북 준비 상태 확인 useEffect
+   * bookRef가 준비되면 isBookReady 상태를 true로 설정
+   */
+  useEffect(() => {
+    let isMounted = true;
+    
+    const checkBookReady = () => {
+      if (!isMounted) return;
+      
+      if (bookRef.current && bookRef.current.pageFlip) {
+        if (!isBookReady) {
+          setIsBookReady(true);
+        }
+        return true; // 준비 완료
+      } else {
+        if (isBookReady) {
+          setIsBookReady(false);
+        }
+        return false; // 아직 준비 안됨
+      }
+    };
+
+    // 초기 체크
+    if (checkBookReady()) {
+      return; // 이미 준비된 경우 interval 불필요
+    }
+    
+    // 주기적으로 체크 (bookRef가 늦게 준비될 수 있음)
+    const interval = setInterval(() => {
+      if (checkBookReady()) {
+        clearInterval(interval); // 준비 완료되면 interval 정리
+      }
+    }, 100);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []); // isBookReady 의존성 제거
+
+  /**
+   * main 이미지 애니메이션 함수
+   * @param {number} startSize - 시작 크기
+   * @param {number} endSize - 종료 크기
+   * @param {number} duration - 애니메이션 지속 시간 (밀리초)
+   */
   const animateMainImage = (startSize, endSize, duration) => {
     const startTime = performance.now();
     const sizeDiff = endSize - startSize;
@@ -40,7 +105,10 @@ function VQBook() {
     animationRef.current = requestAnimationFrame(animate);
   };
 
-  // 컴포넌트 마운트 시 표지 페이지 애니메이션 자동 실행
+  /**
+   * 컴포넌트 마운트 시 표지 페이지 애니메이션 자동 실행
+   * 페이지 로드 후 1초 지연 후 애니메이션 시작
+   */
   useEffect(() => {
     // 페이지 로드 후 더 긴 지연을 두고 애니메이션 시작
     const timer = setTimeout(() => {
@@ -60,16 +128,26 @@ function VQBook() {
     return () => clearTimeout(timer);
   }, []);
 
-  // 컴포넌트 언마운트 시 애니메이션 정리
+  /**
+   * 컴포넌트 언마운트 시 애니메이션 정리
+   * 메모리 누수 방지를 위한 cleanup 함수
+   */
   useEffect(() => {
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      if (flipTimeoutRef.current) {
+        clearTimeout(flipTimeoutRef.current);
+      }
+      isFlippingRef.current = false;
     };
   }, []);
 
-  // 윈도우 크기 변경 감지
+  /**
+   * 윈도우 크기 변경 감지
+   * 모바일/데스크톱 전환 시 반응형 처리
+   */
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 576);
@@ -79,16 +157,19 @@ function VQBook() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // 키보드 이벤트 처리
+  /**
+   * 키보드 이벤트 처리
+   * 좌우 화살표 키로 페이지 이동
+   */
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "ArrowLeft") {
-        if (bookRef.current && currentPage > 0) {
-          bookRef.current.pageFlip().flip(currentPage - 1);
+        if (currentPage > 0) {
+          safePageFlip(currentPage - 1);
         }
       } else if (e.key === "ArrowRight") {
-        if (bookRef.current && currentPage < 24) {
-          bookRef.current.pageFlip().flip(currentPage + 1);
+        if (currentPage < 24) {
+          safePageFlip(currentPage + 1);
         }
       }
     };
@@ -97,7 +178,7 @@ function VQBook() {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [currentPage]);
 
-  // VQ 데이터
+  // VQ 프로젝트 페이지 데이터 (24페이지)
   const vqData = [
     {
       id: "2",
@@ -216,7 +297,45 @@ function VQBook() {
     },
   ];
 
-  // VQ section-img 이미지 매핑 (페이지별)
+  // 페이지 묶음 정보 (2장씩 보여지는 구조)
+  const pageGroups = [
+    { groupId: 1, pages: [0], description: "표지" },
+    { groupId: 2, pages: [1, 2], description: "1-2장" },
+    { groupId: 3, pages: [3, 4], description: "3-4장" },
+    { groupId: 4, pages: [5, 6], description: "5-6장" },
+    { groupId: 5, pages: [7, 8], description: "7-8장" },
+    { groupId: 6, pages: [9, 10], description: "9-10장" },
+    { groupId: 7, pages: [11, 12], description: "11-12장" },
+    { groupId: 8, pages: [13, 14], description: "13-14장" },
+    { groupId: 9, pages: [15, 16], description: "15-16장" },
+    { groupId: 10, pages: [17, 18], description: "17-18장" },
+    { groupId: 11, pages: [19, 20], description: "19-20장" },
+    { groupId: 12, pages: [21, 22], description: "21-22장" },
+    { groupId: 13, pages: [23, 24], description: "23-24장" }
+  ];
+
+  /**
+   * 현재 페이지가 속한 그룹 찾기
+   * @param {number} page - 페이지 번호
+   * @returns {Object} 페이지 그룹 정보
+   */
+  const getCurrentGroup = (page) => {
+    return pageGroups.find(group => group.pages.includes(page)) || pageGroups[0];
+  };
+
+  /**
+   * 페이지 그룹으로 이동하는 함수
+   * @param {number} groupId - 이동할 그룹 ID
+   */
+  const goToGroup = (groupId) => {
+    const targetGroup = pageGroups.find(group => group.groupId === groupId);
+    if (targetGroup && targetGroup.pages.length > 0) {
+      // 그룹의 첫 번째 페이지로 이동
+      safePageFlip(targetGroup.pages[0]);
+    }
+  };
+
+  // VQ section-img 이미지 매핑 (페이지별 상세 이미지)
   const vqSectionImgMapping = {
     2: [
       "/interacivefile/VQFile/sectionimg/2-1.png",
@@ -242,14 +361,14 @@ function VQBook() {
     16: ["/interacivefile/VQFile/sectionimg/16-1.png"],
     17: ["/interacivefile/VQFile/sectionimg/17-1.png"],
     18: ["/interacivefile/VQFile/sectionimg/18-1.png"],
-    19: ["/interacivefile/VQFile/19-1-video.mp4"],
+    19: ["/interacivefile/VQFile/19-1-video.mp4"], // 19페이지는 비디오
     20: ["/interacivefile/VQFile/sectionimg/20-1.png"],
     21: ["/interacivefile/VQFile/sectionimg/21-1.png"],
     22: ["/interacivefile/VQFile/sectionimg/22-1.png"],
     23: ["/interacivefile/VQFile/sectionimg/23-1.png"],
   };
 
-  // VQ 페이지별 개별 이미지 위치 설정
+  // VQ 페이지별 개별 이미지 위치 설정 (절대 위치)
   const vqIndividualImagePositions = {
     2: [
       {
@@ -472,7 +591,14 @@ function VQBook() {
     ],
   };
 
-  // section-img 클릭 핸들러
+  /**
+   * section-img 클릭 핸들러
+   * 페이지별 상세 이미지를 클릭하면 모달로 표시
+   * 특정 이미지(2-1.png)는 3D 모델로 표시
+   * @param {string} imgSrc - 이미지 경로
+   * @param {Event} event - 클릭 이벤트
+   * @param {string} pageId - 페이지 ID
+   */
   const handleSectionImgClick = (imgSrc, event, pageId) => {
     event.stopPropagation(); // 이벤트 전파 방지
 
@@ -486,28 +612,35 @@ function VQBook() {
     }
   };
 
-  // 모달 닫기 핸들러
+  /**
+   * 모달 닫기 핸들러
+   * 모달이 닫힐 때 해당 페이지로 이동
+   */
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedGif(null);
 
     // 모달이 닫힐 때 해당 페이지로 이동
-    if (modalSourcePage !== null && bookRef.current) {
+    if (modalSourcePage !== null) {
       setTimeout(() => {
         // 페이지 ID를 인덱스로 변환 (표지 페이지는 0, 나머지는 ID-1)
         const pageIndex = modalSourcePage === 1 ? 0 : modalSourcePage - 1;
-        bookRef.current.pageFlip().flip(pageIndex);
+        safePageFlip(pageIndex);
       }, 100);
     }
     setModalSourcePage(null);
   };
 
-  // 3D 모달 열기
+  /**
+   * 3D 모달 열기
+   */
   const open3DModal = () => {
     setIs3DModalOpen(true);
   };
 
-  // 3D 모달 닫기
+  /**
+   * 3D 모달 닫기
+   */
   const close3DModal = () => {
     setIs3DModalOpen(false);
   };
@@ -516,12 +649,22 @@ function VQBook() {
   const bookWidth = isMobile ? 320 : 370;
   const bookHeight = isMobile ? 450 : 500;
 
-  // 반응형 이미지 크기 계산 함수
+  /**
+   * 반응형 이미지 크기 계산 함수
+   * @param {number} baseSize - 기본 크기
+   * @param {boolean} isMobile - 모바일 여부
+   * @returns {number} 조정된 크기
+   */
   const getResponsiveImageSize = (baseSize, isMobile) => {
     return isMobile ? baseSize * 0.8 : baseSize;
   };
 
-  // 반응형 이미지 위치 계산 함수
+  /**
+   * 반응형 이미지 위치 계산 함수
+   * @param {Object} baseConfig - 기본 위치 설정
+   * @param {boolean} isMobile - 모바일 여부
+   * @returns {Object} 조정된 위치 설정
+   */
   const getResponsiveImagePosition = (baseConfig, isMobile) => {
     const scale = isMobile ? 0.9 : 1;
     return {
@@ -534,10 +677,24 @@ function VQBook() {
     };
   };
 
-  // 페이지 변경 감지
+  /**
+   * 페이지 변경 감지
+   * 플립북의 페이지가 변경될 때 호출되는 콜백
+   * @param {Object} e - 페이지 변경 이벤트
+   */
   const handlePageChange = (e) => {
     const newPage = e.data;
+    
+    // 현재 페이지와 동일한 경우 업데이트하지 않음
+    if (newPage === currentPage) {
+      return;
+    }
+    
     setCurrentPage(newPage);
+    
+    // 페이지 전환 완료 시 flipping 상태 리셋
+    isFlippingRef.current = false;
+    setIsFlipping(false);
 
     // 표지 페이지(0번)가 완전히 보일 때 애니메이션 활성화
     if (newPage === 0) {
@@ -561,6 +718,108 @@ function VQBook() {
     }
   };
 
+  /**
+   * 안전한 페이지 전환 함수
+   * 중복 호출 방지 및 오류 처리
+   * @param {number} targetPage - 이동할 페이지 번호
+   */
+  const safePageFlip = (targetPage) => {
+    if (!isBookReady) {
+      return;
+    }
+    
+    // 이미 페이지 전환 중인 경우 무시
+    if (isFlippingRef.current) {
+      return;
+    }
+    
+    // 이미 해당 페이지에 있는 경우 전환하지 않음
+    if (currentPage === targetPage) {
+      return;
+    }
+    
+    // 즉시 flipping 상태 설정 (중복 호출 방지)
+    isFlippingRef.current = true;
+    setIsFlipping(true);
+    
+    // 이전 타임아웃 정리
+    if (flipTimeoutRef.current) {
+      clearTimeout(flipTimeoutRef.current);
+    }
+    
+    // 디바운싱: 300ms 후에 실제 페이지 전환 실행
+    flipTimeoutRef.current = setTimeout(() => {
+      if (bookRef.current) {
+        try {
+          // HTMLFlipBook의 다양한 페이지 전환 메서드 시도
+          if (bookRef.current.pageFlip) {
+            const pageFlip = bookRef.current.pageFlip();
+            
+            // 다양한 페이지 전환 방법 시도
+            if (pageFlip && typeof pageFlip.flip === 'function') {
+              // 방법 1: 직접 flip 메서드
+              pageFlip.flip(targetPage);
+            } else if (pageFlip && typeof pageFlip.flipToPage === 'function') {
+              // 방법 2: flipToPage 메서드 (일부 버전에서 지원)
+              pageFlip.flipToPage(targetPage);
+            } else if (pageFlip && typeof pageFlip.goToPage === 'function') {
+              // 방법 3: goToPage 메서드 (일부 버전에서 지원)
+              pageFlip.goToPage(targetPage);
+            } else if (pageFlip && typeof pageFlip.turnToPage === 'function') {
+              // 방법 4: turnToPage 메서드 (일부 버전에서 지원)
+              pageFlip.turnToPage(targetPage);
+            } else if (pageFlip && typeof pageFlip.setPage === 'function') {
+              // 방법 5: setPage 메서드 (일부 버전에서 지원)
+              pageFlip.setPage(targetPage);
+            } else {
+              // fallback: currentPage만 업데이트
+              setCurrentPage(targetPage);
+              isFlippingRef.current = false;
+              setIsFlipping(false);
+            }
+          } else if (bookRef.current.flip) {
+            // 직접 flip 메서드가 있는 경우
+            bookRef.current.flip(targetPage);
+          } else if (bookRef.current.goToPage) {
+            // goToPage 메서드가 있는 경우
+            bookRef.current.goToPage(targetPage);
+          } else {
+            // fallback: currentPage만 업데이트
+            setCurrentPage(targetPage);
+            isFlippingRef.current = false;
+            setIsFlipping(false);
+          }
+        } catch (error) {
+          // 오류 발생 시 currentPage만 업데이트
+          setCurrentPage(targetPage);
+          isFlippingRef.current = false;
+          setIsFlipping(false);
+        }
+      } else {
+        isFlippingRef.current = false;
+        setIsFlipping(false);
+      }
+    }, 300);
+  };
+
+  /**
+   * 이전 페이지로 이동
+   */
+  const goToPreviousPage = () => {
+    if (currentPage > 0) {
+      safePageFlip(currentPage - 1);
+    }
+  };
+
+  /**
+   * 다음 페이지로 이동
+   */
+  const goToNextPage = () => {
+    if (currentPage < 24) {
+      safePageFlip(currentPage + 1);
+    }
+  };
+
   return (
     <div className="w-full h-full flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
       {/* 플립북 컨테이너 */}
@@ -576,6 +835,8 @@ function VQBook() {
           showPageCorners={false}
           size="fixed"
           onFlip={handlePageChange}
+          onFlipStart={(e) => {}}
+          onFlipEnd={(e) => {}}
           usePortrait={isMobile}
           useMouseEvents={true}
           swipeDistance={50}
@@ -597,6 +858,7 @@ function VQBook() {
             </div>
           </div>
 
+          {/* 내부 페이지들 */}
           {vqData.map((page, index) => (
             <div
               key={page.id}
@@ -604,6 +866,7 @@ function VQBook() {
             >
               <div className="w-full h-full flex flex-col justify-center items-center p-0">
                 <div className="w-full h-full relative">
+                  {/* 페이지 배경 이미지 */}
                   <img
                     src={`/Pdf-img/VQ/${page.id}.png`}
                     alt={page.name}
@@ -662,25 +925,76 @@ function VQBook() {
       </div>
 
       {/* 네비게이션 */}
-      <div className="flex justify-center gap-5 mt-6">
-        <button
-          onClick={() => bookRef.current?.pageFlip().flip(currentPage - 1)}
-          disabled={currentPage === 0}
-          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          ◀ 이전
-        </button>
-        <span className="px-4 py-2 text-white font-bold">
-          {currentPage + 1} / 25
-        </span>
-        <button
-          onClick={() => bookRef.current?.pageFlip().flip(currentPage + 1)}
-          disabled={currentPage === 24}
-          className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-        >
-          다음 ▶
-        </button>
+      <div className="flex flex-col items-center gap-4 mt-6">
+        {/* 페이지 그룹 네비게이션 */}
+        <div className="flex justify-center gap-2 flex-wrap max-w-4xl">
+          {pageGroups.map((group) => {
+            const currentGroup = getCurrentGroup(currentPage);
+            const isActive = currentGroup.groupId === group.groupId;
+            return (
+              <button
+                key={group.groupId}
+                onClick={() => goToGroup(group.groupId)}
+                className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 hover:scale-105 shadow-lg ${
+                  isActive
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+                title={`${group.description} (페이지 ${group.pages.map(p => p + 1).join(', ')})`}
+              >
+                {group.groupId}
+              </button>
+            );
+          })}
+        </div>
+        
+        {/* 현재 그룹 정보 표시 */}
+        <div className="text-white text-center">
+          <div className="text-lg font-bold mb-1">
+            {getCurrentGroup(currentPage).description}
+          </div>
+          <div className="text-sm opacity-75">
+            페이지 {currentPage + 1} / 25
+          </div>
+        </div>
+        
+        {/* 이전/다음 그룹 버튼 */}
+        <div className="flex justify-center gap-5">
+          <button
+            onClick={() => {
+              const currentGroup = getCurrentGroup(currentPage);
+              const prevGroup = pageGroups.find(g => g.groupId === currentGroup.groupId - 1);
+              if (prevGroup) {
+                goToGroup(prevGroup.groupId);
+              }
+            }}
+            disabled={getCurrentGroup(currentPage).groupId === 1}
+            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            ◀ 이전 그룹
+          </button>
+          <button
+            onClick={() => {
+              const currentGroup = getCurrentGroup(currentPage);
+              const nextGroup = pageGroups.find(g => g.groupId === currentGroup.groupId + 1);
+              if (nextGroup) {
+                goToGroup(nextGroup.groupId);
+              }
+            }}
+            disabled={getCurrentGroup(currentPage).groupId === pageGroups.length}
+            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          >
+            다음 그룹 ▶
+          </button>
+        </div>
       </div>
+      
+      {/* Book 준비 상태 표시 */}
+      {!isBookReady && (
+        <div className="mt-2 text-white text-sm opacity-75">
+          책을 불러오는 중... 잠시만 기다려주세요.
+        </div>
+      )}
 
       {/* 개선된 Gif 모달 */}
       {isModalOpen && selectedGif && (
