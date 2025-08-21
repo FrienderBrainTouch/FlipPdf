@@ -213,7 +213,7 @@ function Model3D({ onClose }) {
         <div className="flex justify-center mb-4 sm:mb-6">
           <div
             ref={containerRef}
-            className="w-24 h-24 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem] perspective-1000 cursor-grab active:cursor-grabbing"
+            className="w-24 h-24 sm:w-48 sm:h-48 md:w-64 md:h-64 lg:w-[16rem] lg:h-[16rem] perspective-1000 cursor-grab active:cursor-grabbing"
             onMouseDown={handleMouseDown}
             onTouchStart={handleTouchStart}
             style={{ 
@@ -229,23 +229,23 @@ function Model3D({ onClose }) {
                 transform: `rotateX(${rotationX}deg) rotateY(${rotationY}deg)`,
               }}
             >
-              {/* 3D 모델의 각 면 - 정면 */}
+              {/* 3D 모델의 각 면 - 정면 (앞쪽) */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-lg sm:text-xl md:text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
                   background: "linear-gradient(45deg, #ff6b6b, #ee5a24)",
-                  transform: "translateZ(calc(50% - 1px))",
+                  transform: "translateZ(calc(50% - 1px))", // 정면을 앞으로 이동
                 }}
               >
                 3D 모델
               </div>
 
-              {/* 3D 모델의 각 면 - 뒤면 */}
+              {/* 3D 모델의 각 면 - 뒤면 (뒤쪽) */}
               <div
                 className="absolute w-full h-full flex items-center justify-center text-lg sm:text-xl md:text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
                   background: "linear-gradient(45deg, #4834d4, #686de0)",
-                  transform: "translateZ(calc(-50% + 1px)) rotateY(180deg)",
+                  transform: "translateZ(calc(50% + 1px)) rotateY(180deg)", // 뒤면을 뒤로 이동
                 }}
               >
                 뒤면
@@ -256,7 +256,7 @@ function Model3D({ onClose }) {
                 className="absolute w-full h-full flex items-center justify-center text-lg sm:text-xl md:text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
                   background: "linear-gradient(45deg, #00d2d3, #54a0ff)",
-                  transform: "translateX(calc(50% - 1px)) rotateY(90deg)",
+                  transform: "translateX(calc(50% - 1px)) rotateY(90deg)", // 오른쪽 면을 오른쪽으로 이동
                 }}
               >
                 오른쪽
@@ -267,7 +267,7 @@ function Model3D({ onClose }) {
                 className="absolute w-full h-full flex items-center justify-center text-lg sm:text-xl md:text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
                   background: "linear-gradient(45deg, #ff9ff3, #f368e0)",
-                  transform: "translateX(calc(-50% + 1px)) rotateY(-90deg)",
+                  transform: "translateX(calc(-50% + 1px)) rotateY(-90deg)", // 왼쪽 면을 왼쪽으로 이동
                 }}
               >
                 왼쪽
@@ -278,7 +278,7 @@ function Model3D({ onClose }) {
                 className="absolute w-full h-full flex items-center justify-center text-lg sm:text-xl md:text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
                   background: "linear-gradient(45deg, #26de81, #20bf6b)",
-                  transform: "translateY(calc(-50% + 1px)) rotateX(90deg)",
+                  transform: "translateY(calc(-50% + 1px)) rotateX(90deg)", // 위쪽 면을 위로 이동
                 }}
               >
                 위쪽
@@ -289,7 +289,7 @@ function Model3D({ onClose }) {
                 className="absolute w-full h-full flex items-center justify-center text-lg sm:text-xl md:text-2xl font-bold text-white border-2 border-white border-opacity-30"
                 style={{
                   background: "linear-gradient(45deg, #fd79a8, #e84393)",
-                  transform: "translateY(calc(50% - 1px)) rotateX(-90deg)",
+                  transform: "translateY(calc(50% - 1px)) rotateX(-90deg)", // 아래쪽 면을 아래로 이동
                 }}
               >
                 아래쪽
