@@ -69,7 +69,7 @@ function Header({ selectedBook, onBookChange }) {
   };
 
   return (
-    <header className="w-full py-4 px-6 flex flex-col items-center gap-4">
+    <header className="w-full px-6 flex flex-col items-center gap-4">
       {/* 책자 선택 버튼들과 기능 버튼들을 한 줄에 배치 */}
       <div className="flex items-center gap-4">
         {/* 책자 선택 버튼들 */}

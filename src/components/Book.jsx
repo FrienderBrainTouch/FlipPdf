@@ -813,7 +813,7 @@ function Book() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 lg:p-6">
+    <div className="w-full h-full flex flex-col justify-center items-center">
       {/* 플립북 컨테이너 */}
       <div className="flex justify-center items-center perspective-1000">
         <HTMLFlipBook
