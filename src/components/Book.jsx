@@ -986,37 +986,9 @@ function Book() {
 
       {/* 네비게이션 */}
       <div className="flex flex-col items-center gap-4 mt-6">
-        {/* 페이지 그룹 네비게이션 */}
-        <div className="flex justify-center gap-2 flex-wrap">
-          {pageGroups.map((group) => {
-            const currentGroup = getCurrentGroup(currentPage);
-            const isActive = currentGroup.groupId === group.groupId;
-            return (
-              <button
-                key={group.groupId}
-                onClick={() => goToGroup(group.groupId)}
-                className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 shadow-lg ${
-                  isActive
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-                title={`${group.description} (페이지 ${group.pages.map(p => p + 1).join(', ')})`}
-              >
-                {group.groupId}
-              </button>
-            );
-          })}
-        </div>
-        
-        {/* 현재 그룹 정보 표시 */}
-        <div className="text-white text-center">
-          <div className="text-sm opacity-75">
-            페이지 {currentPage + 1} / 8
-          </div>
-        </div>
-        
-        {/* 이전/다음 그룹 버튼 */}
-        <div className="flex justify-center gap-5">
+        {/* 페이지 그룹 네비게이션과 이전/다음 버튼을 한 줄에 배치 */}
+        <div className="flex items-center gap-3">
+          {/* 이전 그룹 버튼 */}
           <button
             onClick={() => {
               const currentGroup = getCurrentGroup(currentPage);
@@ -1030,6 +1002,30 @@ function Book() {
           >
             ◀ 이전
           </button>
+          
+          {/* 페이지 그룹 네비게이션 */}
+          <div className="flex justify-center gap-2 flex-wrap">
+            {pageGroups.map((group) => {
+              const currentGroup = getCurrentGroup(currentPage);
+              const isActive = currentGroup.groupId === group.groupId;
+              return (
+                <button
+                  key={group.groupId}
+                  onClick={() => goToGroup(group.groupId)}
+                  className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 shadow-lg ${
+                    isActive
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
+                  title={`${group.description} (페이지 ${group.pages.map(p => p + 1).join(', ')})`}
+                >
+                  {group.groupId}
+                </button>
+              );
+            })}
+          </div>
+          
+          {/* 다음 그룹 버튼 */}
           <button
             onClick={() => {
               const currentGroup = getCurrentGroup(currentPage);
@@ -1043,6 +1039,13 @@ function Book() {
           >
             다음 ▶
           </button>
+        </div>
+        
+        {/* 현재 그룹 정보 표시 */}
+        <div className="text-white text-center">
+          <div className="text-sm opacity-75">
+            페이지 {currentPage + 1} / 8
+          </div>
         </div>
       </div>
       
