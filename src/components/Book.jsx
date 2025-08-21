@@ -16,7 +16,7 @@ function Book() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalSourcePage, setModalSourcePage] = useState(null);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
   const animationRef = useRef(null);
   const bookRef = useRef(null);
 

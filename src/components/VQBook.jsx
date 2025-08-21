@@ -11,7 +11,7 @@ function VQBook() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalSourcePage, setModalSourcePage] = useState(null);
   const [is3DModalOpen, setIs3DModalOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 576);
   const animationRef = useRef(null);
   const bookRef = useRef(null);
 
@@ -50,7 +50,7 @@ function VQBook() {
       const mainImageTimer = setTimeout(() => {
         setIsMainImageAnimating(true);
         // 애니메이션 시작
-        const endSize = Math.min(window.innerWidth < 768 ? 320 : 320, 320); // 100px 작은 크기
+        const endSize = Math.min(window.innerWidth < 576 ? 320 : 320, 320); // 100px 작은 크기
         animateMainImage(1, endSize, 1000);
       }, 2000);
 
@@ -546,7 +546,7 @@ function VQBook() {
         // 2초 후에 main 이미지 애니메이션 시작
         setTimeout(() => {
           setIsMainImageAnimating(true);
-          const endSize = Math.min(window.innerWidth < 768 ? 320 : 320, 320);
+          const endSize = Math.min(window.innerWidth < 576 ? 320 : 320, 320);
           animateMainImage(1, endSize, 1000);
         }, 2000);
       }, 500);
