@@ -175,12 +175,30 @@ function Book() {
    */
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 576);
+      const wasMobile = isMobile;
+      const newIsMobile = window.innerWidth < 576;
+      
+      if (wasMobile !== newIsMobile) {
+        setIsMobile(newIsMobile);
+        
+        // 페이지 그룹이 변경된 후 현재 페이지가 유효한지 확인
+        setTimeout(() => {
+          const newPageGroups = getPageGroups();
+          const isValidPage = newPageGroups.some(group => 
+            group.pages.includes(currentPage)
+          );
+          
+          // 현재 페이지가 새로운 그룹 구조에서 유효하지 않으면 첫 번째 페이지로 이동
+          if (!isValidPage && currentPage !== 0) {
+            safePageFlip(0);
+          }
+        }, 100);
+      }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [isMobile, currentPage]);
 
   /**
    * 키보드 이벤트 처리
@@ -242,14 +260,34 @@ function Book() {
     },
   ];
 
-  // 페이지 묶음 정보 (2장씩 보여지는 구조)
-  const pageGroups = [
-    { groupId: 1, pages: [0], description: "표지" },
-    { groupId: 2, pages: [1, 2], description: "1-2장" },
-    { groupId: 3, pages: [3, 4], description: "3-4장" },
-    { groupId: 4, pages: [5, 6], description: "5-6장" },
-    { groupId: 5, pages: [7], description: "마지막" }
-  ];
+  // 페이지 묶음 정보 (반응형 구조)
+  const getPageGroups = () => {
+    if (isMobile) {
+      // 576px 이하: 1장씩 보여지는 구조 (표지, 1, 2, 3... 순)
+      return [
+        { groupId: 1, pages: [0], description: "표지" },
+        { groupId: 2, pages: [1], description: "1장" },
+        { groupId: 3, pages: [2], description: "2장" },
+        { groupId: 4, pages: [3], description: "3장" },
+        { groupId: 5, pages: [4], description: "4장" },
+        { groupId: 6, pages: [5], description: "5장" },
+        { groupId: 7, pages: [6], description: "6장" },
+        { groupId: 8, pages: [7], description: "7장" }
+      ];
+    } else {
+      // 576px 이상: 2장씩 보여지는 구조 (기존과 동일)
+      return [
+        { groupId: 1, pages: [0], description: "표지" },
+        { groupId: 2, pages: [1, 2], description: "1-2장" },
+        { groupId: 3, pages: [3, 4], description: "3-4장" },
+        { groupId: 4, pages: [5, 6], description: "5-6장" },
+        { groupId: 5, pages: [7], description: "마지막" }
+      ];
+    }
+  };
+
+  // 현재 페이지 그룹 가져오기
+  const pageGroups = getPageGroups();
 
   /**
    * 현재 페이지가 속한 그룹 찾기
@@ -257,7 +295,8 @@ function Book() {
    * @returns {Object} 페이지 그룹 정보
    */
   const getCurrentGroup = (page) => {
-    return pageGroups.find(group => group.pages.includes(page)) || pageGroups[0];
+    const currentPageGroups = getPageGroups();
+    return currentPageGroups.find(group => group.pages.includes(page)) || currentPageGroups[0];
   };
 
   /**
@@ -265,7 +304,8 @@ function Book() {
    * @param {number} groupId - 이동할 그룹 ID
    */
   const goToGroup = (groupId) => {
-    const targetGroup = pageGroups.find(group => group.groupId === groupId);
+    const currentPageGroups = getPageGroups();
+    const targetGroup = currentPageGroups.find(group => group.groupId === groupId);
     if (targetGroup && targetGroup.pages.length > 0) {
       // 그룹의 첫 번째 페이지로 이동
       safePageFlip(targetGroup.pages[0]);
@@ -603,12 +643,24 @@ function Book() {
    * @returns {Object} 조정된 위치 설정
    */
   const getResponsiveImagePosition = (baseConfig, isMobile) => {
+    // baseConfig가 없거나 유효하지 않은 경우 기본값 반환
+    if (!baseConfig || typeof baseConfig !== 'object') {
+      return {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "100%",
+        maxWidth: "200px"
+      };
+    }
+
     const scale = isMobile ? 0.9 : 1;
     return {
       ...baseConfig,
-      width: `${parseFloat(baseConfig.width) * scale}%`,
+      width: `${parseFloat(baseConfig.width || 100) * scale}%`,
       maxWidth: `${getResponsiveImageSize(
-        parseInt(baseConfig.maxWidth),
+        parseInt(baseConfig.maxWidth || 200),
         isMobile
       )}px`,
     };
@@ -881,25 +933,34 @@ function Book() {
                   {sectionImgMapping[page.id] &&
                     individualImagePositions[page.id] && (
                       <>
-                        {sectionImgMapping[page.id].map((imgSrc, imgIndex) => (
-                          <div
-                            key={imgIndex}
-                            className="absolute cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
-                            style={getResponsiveImagePosition(
-                              individualImagePositions[page.id][imgIndex],
-                              isMobile
-                            )}
-                            onClick={(e) =>
-                              handleSectionImgClick(imgSrc, e, page.id)
-                            }
-                          >
-                            <img
-                              src={imgSrc}
-                              alt={`Section ${page.id}-${imgIndex + 1}`}
-                              className="w-full h-full object-contain opacity-0 hover:opacity-100 transition-opacity duration-300"
-                            />
-                          </div>
-                        ))}
+                        {sectionImgMapping[page.id].map((imgSrc, imgIndex) => {
+                          const imagePosition = individualImagePositions[page.id]?.[imgIndex];
+                          
+                          // 이미지 위치 설정이 없는 경우 렌더링하지 않음
+                          if (!imagePosition) {
+                            return null;
+                          }
+                          
+                          return (
+                            <div
+                              key={imgIndex}
+                              className="absolute cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
+                              style={getResponsiveImagePosition(
+                                imagePosition,
+                                isMobile
+                              )}
+                              onClick={(e) =>
+                                handleSectionImgClick(imgSrc, e, page.id)
+                              }
+                            >
+                              <img
+                                src={imgSrc}
+                                alt={`Section ${page.id}-${imgIndex + 1}`}
+                                className="w-full h-full object-contain opacity-0 hover:opacity-100 transition-opacity duration-300"
+                              />
+                            </div>
+                          );
+                        })}
                       </>
                     )}
 
@@ -991,8 +1052,9 @@ function Book() {
           {/* 이전 그룹 버튼 */}
           <button
             onClick={() => {
+              const currentPageGroups = getPageGroups();
               const currentGroup = getCurrentGroup(currentPage);
-              const prevGroup = pageGroups.find(g => g.groupId === currentGroup.groupId - 1);
+              const prevGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId - 1);
               if (prevGroup) {
                 goToGroup(prevGroup.groupId);
               }
@@ -1004,8 +1066,8 @@ function Book() {
           </button>
           
           {/* 페이지 그룹 네비게이션 */}
-          <div className="flex justify-center gap-2 flex-wrap">
-            {pageGroups.map((group) => {
+          {/* <div className="flex justify-center gap-2 flex-wrap">
+            {getPageGroups().map((group) => {
               const currentGroup = getCurrentGroup(currentPage);
               const isActive = currentGroup.groupId === group.groupId;
               return (
@@ -1023,18 +1085,19 @@ function Book() {
                 </button>
               );
             })}
-          </div>
+          </div> */}
           
           {/* 다음 그룹 버튼 */}
           <button
             onClick={() => {
+              const currentPageGroups = getPageGroups();
               const currentGroup = getCurrentGroup(currentPage);
-              const nextGroup = pageGroups.find(g => g.groupId === currentGroup.groupId + 1);
+              const nextGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId + 1);
               if (nextGroup) {
                 goToGroup(nextGroup.groupId);
               }
             }}
-            disabled={getCurrentGroup(currentPage).groupId === pageGroups.length}
+            disabled={getCurrentGroup(currentPage).groupId === getPageGroups().length}
             className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             다음 ▶

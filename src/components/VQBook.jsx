@@ -150,12 +150,30 @@ function VQBook() {
    */
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 576);
+      const wasMobile = isMobile;
+      const newIsMobile = window.innerWidth < 576;
+      
+      if (wasMobile !== newIsMobile) {
+        setIsMobile(newIsMobile);
+        
+        // 페이지 그룹이 변경된 후 현재 페이지가 유효한지 확인
+        setTimeout(() => {
+          const newPageGroups = getPageGroups();
+          const isValidPage = newPageGroups.some(group => 
+            group.pages.includes(currentPage)
+          );
+          
+          // 현재 페이지가 새로운 그룹 구조에서 유효하지 않으면 첫 번째 페이지로 이동
+          if (!isValidPage && currentPage !== 0) {
+            safePageFlip(0);
+          }
+        }, 100);
+      }
     };
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [isMobile, currentPage]);
 
   /**
    * 키보드 이벤트 처리
@@ -297,22 +315,59 @@ function VQBook() {
     },
   ];
 
-  // 페이지 묶음 정보 (2장씩 보여지는 구조)
-  const pageGroups = [
-    { groupId: 1, pages: [0], description: "표지" },
-    { groupId: 2, pages: [1, 2], description: "1-2장" },
-    { groupId: 3, pages: [3, 4], description: "3-4장" },
-    { groupId: 4, pages: [5, 6], description: "5-6장" },
-    { groupId: 5, pages: [7, 8], description: "7-8장" },
-    { groupId: 6, pages: [9, 10], description: "9-10장" },
-    { groupId: 7, pages: [11, 12], description: "11-12장" },
-    { groupId: 8, pages: [13, 14], description: "13-14장" },
-    { groupId: 9, pages: [15, 16], description: "15-16장" },
-    { groupId: 10, pages: [17, 18], description: "17-18장" },
-    { groupId: 11, pages: [19, 20], description: "19-20장" },
-    { groupId: 12, pages: [21, 22], description: "21-22장" },
-    { groupId: 13, pages: [23, 24], description: "23-24장" }
-  ];
+  // 페이지 묶음 정보 (반응형 구조)
+  const getPageGroups = () => {
+    if (isMobile) {
+      // 576px 이하: 1장씩 보여지는 구조 (표지, 1, 2, 3... 순)
+      return [
+        { groupId: 1, pages: [0], description: "표지" },
+        { groupId: 2, pages: [1], description: "1장" },
+        { groupId: 3, pages: [2], description: "2장" },
+        { groupId: 4, pages: [3], description: "3장" },
+        { groupId: 5, pages: [4], description: "4장" },
+        { groupId: 6, pages: [5], description: "5장" },
+        { groupId: 7, pages: [6], description: "6장" },
+        { groupId: 8, pages: [7], description: "7장" },
+        { groupId: 9, pages: [8], description: "8장" },
+        { groupId: 10, pages: [9], description: "9장" },
+        { groupId: 11, pages: [10], description: "10장" },
+        { groupId: 12, pages: [11], description: "11장" },
+        { groupId: 13, pages: [12], description: "12장" },
+        { groupId: 14, pages: [13], description: "13장" },
+        { groupId: 15, pages: [14], description: "14장" },
+        { groupId: 16, pages: [15], description: "15장" },
+        { groupId: 17, pages: [16], description: "16장" },
+        { groupId: 18, pages: [17], description: "17장" },
+        { groupId: 19, pages: [18], description: "18장" },
+        { groupId: 20, pages: [19], description: "19장" },
+        { groupId: 21, pages: [20], description: "20장" },
+        { groupId: 22, pages: [21], description: "21장" },
+        { groupId: 23, pages: [22], description: "22장" },
+        { groupId: 24, pages: [23], description: "23장" },
+        { groupId: 25, pages: [24], description: "24장" }
+      ];
+    } else {
+      // 576px 이상: 2장씩 보여지는 구조 (기존과 동일)
+      return [
+        { groupId: 1, pages: [0], description: "표지" },
+        { groupId: 2, pages: [1, 2], description: "1-2장" },
+        { groupId: 3, pages: [3, 4], description: "3-4장" },
+        { groupId: 4, pages: [5, 6], description: "5-6장" },
+        { groupId: 5, pages: [7, 8], description: "7-8장" },
+        { groupId: 6, pages: [9, 10], description: "9-10장" },
+        { groupId: 7, pages: [11, 12], description: "11-12장" },
+        { groupId: 8, pages: [13, 14], description: "13-14장" },
+        { groupId: 9, pages: [15, 16], description: "15-16장" },
+        { groupId: 10, pages: [17, 18], description: "17-18장" },
+        { groupId: 11, pages: [19, 20], description: "19-20장" },
+        { groupId: 12, pages: [21, 22], description: "21-22장" },
+        { groupId: 13, pages: [23, 24], description: "23-24장" }
+      ];
+    }
+  };
+
+  // 현재 페이지 그룹 가져오기
+  const pageGroups = getPageGroups();
 
   /**
    * 현재 페이지가 속한 그룹 찾기
@@ -320,7 +375,8 @@ function VQBook() {
    * @returns {Object} 페이지 그룹 정보
    */
   const getCurrentGroup = (page) => {
-    return pageGroups.find(group => group.pages.includes(page)) || pageGroups[0];
+    const currentPageGroups = getPageGroups();
+    return currentPageGroups.find(group => group.pages.includes(page)) || currentPageGroups[0];
   };
 
   /**
@@ -328,7 +384,8 @@ function VQBook() {
    * @param {number} groupId - 이동할 그룹 ID
    */
   const goToGroup = (groupId) => {
-    const targetGroup = pageGroups.find(group => group.groupId === groupId);
+    const currentPageGroups = getPageGroups();
+    const targetGroup = currentPageGroups.find(group => group.groupId === groupId);
     if (targetGroup && targetGroup.pages.length > 0) {
       // 그룹의 첫 번째 페이지로 이동
       safePageFlip(targetGroup.pages[0]);
@@ -361,11 +418,15 @@ function VQBook() {
     16: ["/interacivefile/VQFile/sectionimg/16-1.png"],
     17: ["/interacivefile/VQFile/sectionimg/17-1.png"],
     18: ["/interacivefile/VQFile/sectionimg/18-1.png"],
-    19: ["/interacivefile/VQFile/19-1-video.mp4"], // 19페이지는 비디오
+    19: [
+      "/interacivefile/VQFile/19-1-video.mp4", // 19페이지는 비디오
+      "/interacivefile/VQFile/19-2-video.mp4", // 19페이지는 비디오
+    ],
     20: ["/interacivefile/VQFile/sectionimg/20-1.png"],
     21: ["/interacivefile/VQFile/sectionimg/21-1.png"],
     22: ["/interacivefile/VQFile/sectionimg/22-1.png"],
     23: ["/interacivefile/VQFile/sectionimg/23-1.png"],
+    24: ["/interacivefile/VQFile/sectionimg/24-1.png"],
   };
 
   // VQ 페이지별 개별 이미지 위치 설정 (절대 위치)
@@ -552,6 +613,13 @@ function VQBook() {
         width: "100%",
         maxWidth: "175px",
       },
+      {
+        position: "absolute",
+        top: "10%",
+        right: "25%",
+        width: "100%",
+        maxWidth: "175px",
+      },
     ],
     20: [
       {
@@ -587,6 +655,15 @@ function VQBook() {
         left: "31%",
         width: "100%",
         maxWidth: "134px",
+      },
+    ],
+    24: [
+      {
+        position: "absolute",
+        top: "20%",
+        left: "25%",
+        width: "100%",
+        maxWidth: "200px",
       },
     ],
   };
@@ -666,12 +743,24 @@ function VQBook() {
    * @returns {Object} 조정된 위치 설정
    */
   const getResponsiveImagePosition = (baseConfig, isMobile) => {
+    // baseConfig가 없거나 유효하지 않은 경우 기본값 반환
+    if (!baseConfig || typeof baseConfig !== 'object') {
+      return {
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "100%",
+        maxWidth: "200px"
+      };
+    }
+
     const scale = isMobile ? 0.9 : 1;
     return {
       ...baseConfig,
-      width: `${parseFloat(baseConfig.width) * scale}%`,
+      width: `${parseFloat(baseConfig.width || 100) * scale}%`,
       maxWidth: `${getResponsiveImageSize(
-        parseInt(baseConfig.maxWidth),
+        parseInt(baseConfig.maxWidth || 200),
         isMobile
       )}px`,
     };
@@ -880,12 +969,19 @@ function VQBook() {
                         {vqSectionImgMapping[page.id].map(
                           (mediaSrc, imgIndex) => {
                             const isVideo = mediaSrc.endsWith(".mp4");
+                            const imagePosition = vqIndividualImagePositions[page.id]?.[imgIndex];
+                            
+                            // 이미지 위치 설정이 없는 경우 렌더링하지 않음
+                            if (!imagePosition) {
+                              return null;
+                            }
+                            
                             return (
                               <div
                                 key={imgIndex}
                                 className="absolute cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
                                 style={getResponsiveImagePosition(
-                                  vqIndividualImagePositions[page.id][imgIndex],
+                                  imagePosition,
                                   isMobile
                                 )}
                                 onClick={(e) =>
@@ -927,8 +1023,8 @@ function VQBook() {
       {/* 네비게이션 */}
       <div className="flex flex-col items-center gap-4 mt-6">
         {/* 페이지 그룹 네비게이션 */}
-        <div className="flex justify-center gap-2 flex-wrap max-w-4xl">
-          {pageGroups.map((group) => {
+        {/* <div className="flex justify-center gap-2 flex-wrap max-w-4xl">
+          {getPageGroups().map((group) => {
             const currentGroup = getCurrentGroup(currentPage);
             const isActive = currentGroup.groupId === group.groupId;
             return (
@@ -946,13 +1042,13 @@ function VQBook() {
               </button>
             );
           })}
-        </div>
+        </div> */}
         
         {/* 현재 그룹 정보 표시 */}
         <div className="text-white text-center">
-          <div className="text-lg font-bold mb-1">
+          {/* <div className="text-lg font-bold mb-1">
             {getCurrentGroup(currentPage).description}
-          </div>
+          </div> */}
           <div className="text-sm opacity-75">
             페이지 {currentPage + 1} / 25
           </div>
@@ -962,8 +1058,9 @@ function VQBook() {
         <div className="flex justify-center gap-5">
           <button
             onClick={() => {
+              const currentPageGroups = getPageGroups();
               const currentGroup = getCurrentGroup(currentPage);
-              const prevGroup = pageGroups.find(g => g.groupId === currentGroup.groupId - 1);
+              const prevGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId - 1);
               if (prevGroup) {
                 goToGroup(prevGroup.groupId);
               }
@@ -971,20 +1068,21 @@ function VQBook() {
             disabled={getCurrentGroup(currentPage).groupId === 1}
             className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            ◀ 이전 그룹
+            ◀ 이전
           </button>
           <button
             onClick={() => {
+              const currentPageGroups = getPageGroups();
               const currentGroup = getCurrentGroup(currentPage);
-              const nextGroup = pageGroups.find(g => g.groupId === currentGroup.groupId + 1);
+              const nextGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId + 1);
               if (nextGroup) {
                 goToGroup(nextGroup.groupId);
               }
             }}
-            disabled={getCurrentGroup(currentPage).groupId === pageGroups.length}
-            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            disabled={getCurrentGroup(currentPage).groupId === getPageGroups().length}
+            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-100 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
-            다음 그룹 ▶
+            다음 ▶
           </button>
         </div>
       </div>

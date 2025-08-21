@@ -83,8 +83,7 @@ function Header({ selectedBook, onBookChange }) {
                 : "bg-gray-300 hover:bg-gray-400 text-gray-700"
             }`}
             title="Friender 플립북 보기"
-          >
-            📚 Friender
+          >Friender
           </button>
           
           {/* VQ 프로젝트 선택 버튼 */}
@@ -96,8 +95,7 @@ function Header({ selectedBook, onBookChange }) {
                 : "bg-gray-300 hover:bg-gray-400 text-gray-700"
             }`}
             title="VQ 플립북 보기"
-          >
-            📚 VQ
+          >VQ
           </button>
         </div>
 
