@@ -623,8 +623,8 @@ function Book() {
   };
 
   // 해상도 확인하여 크기 지정
-  const bookWidth = isMobile ? 320 : 370;
-  const bookHeight = isMobile ? 450 : 500;
+  const bookWidth = isMobile ? 300 : 350;
+  const bookHeight = isMobile ? 400 : 450;
 
   /**
    * 반응형 이미지 크기 계산 함수
