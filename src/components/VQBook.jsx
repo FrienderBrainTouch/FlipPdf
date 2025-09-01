@@ -915,10 +915,10 @@ function VQBook() {
       <div className={`${isMobile ? 'w-full' : 'flex justify-center items-center perspective-1000'}`}>
         {isMobile ? (
           // 모바일: 세로 스크롤로 페이지를 차례대로 표시
-          <div className="w-full space-y-0 py-0 pb-20 overflow-y-auto">
+          <div className="w-full space-y-0 py-0 pb-16 overflow-y-auto">
             {/* 표지 페이지 */}
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden" style={{ height: isMobile ? 'auto' : '450px' }}>
-              <div className="w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative">
+            <div className={`${isMobile ? 'relative overflow-hidden' : 'bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden'}`} style={{ height: isMobile ? 'auto' : '450px' }}>
+              <div className={`${isMobile ? 'w-full h-full flex flex-col justify-center items-center p-0 text-center text-white font-bold relative' : 'w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative'}`}>
                 {/* 배경 이미지 */}
                 <img
                   src="/Pdf-img/VQ/1.png"
@@ -1185,7 +1185,7 @@ function VQBook() {
 
       {/* 모바일 하단 기능 버튼 */}
       {isMobile && (
-        <div className="fixed bottom-0 left-0 right-0 bg-[#0e1a26] border-t border-gray-700 p-4 z-40">
+        <div className="fixed bottom-0 left-0 right-0 bg-[#0e1a26] p-4 z-40">
           <div className="flex justify-around items-center max-w-md mx-auto">
             {/* Friender 버튼 */}
             <button 

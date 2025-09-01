@@ -45,7 +45,7 @@ function App() {
       </div>
       
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 flex justify-center items-center p-2.5 pt-24">
+      <div className="flex-1 flex justify-center items-center p-0 pt-[32px] md:p-2.5">
         {/* 선택된 책에 따라 적절한 플립북 컴포넌트 렌더링 */}
         {selectedBook === "friender" ? <Book /> : <VQBook />}
       </div>

@@ -31,6 +31,7 @@ body {
     overflow: auto;
     height: auto;
     min-height: 100dvh;
+    display: block;
   }
 }
 
@@ -48,6 +49,8 @@ body {
     height: auto;
     min-height: 100dvh;
     align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0;
   }
 }
 
@@ -140,7 +143,7 @@ button:hover {
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   #root {
-    padding: 5px;
+    padding: 0;
   }
   
   .perspective-1000 {
