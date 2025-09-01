@@ -24,12 +24,31 @@ body {
   align-items: center;
 }
 
+/* 모바일에서 스크롤 허용 */
+@media (max-width: 768px) {
+  html,
+  body {
+    overflow: auto;
+    height: auto;
+    min-height: 100dvh;
+  }
+}
+
 #root {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 10px;
+}
+
+/* 모바일에서 root 요소 스크롤 허용 */
+@media (max-width: 768px) {
+  #root {
+    height: auto;
+    min-height: 100dvh;
+    align-items: flex-start;
+  }
 }
 
 /* FlipBook 커스텀 스타일 */
@@ -126,6 +145,17 @@ button:hover {
   
   .perspective-1000 {
     perspective: 800px;
+  }
+  
+  /* 모바일에서 스크롤 개선 */
+  * {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* 모바일에서 스크롤바 숨김 */
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
   }
 }
 

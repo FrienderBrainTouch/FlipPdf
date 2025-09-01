@@ -68,10 +68,15 @@ function Header({ selectedBook, onBookChange }) {
     }
   };
 
-  return (
+    return (
     <header className="w-full px-6 flex flex-col items-center gap-4">
-      {/* 책자 선택 버튼들과 기능 버튼들을 한 줄에 배치 */}
-      <div className="flex items-center gap-4">
+      {/* 모바일에서만 프로젝트 이름 중앙 표시 */}
+      <div className="md:hidden text-white text-2xl font-bold text-center">
+        {selectedBook === "friender" ? "Friender" : "VQ"}
+      </div>
+      
+      {/* 데스크톱에서만 책자 선택 버튼들과 기능 버튼들 표시 */}
+      <div className="hidden md:flex items-center gap-4">
         {/* 책자 선택 버튼들 */}
         <div className="flex gap-3">
           {/* Friender 프로젝트 선택 버튼 */}

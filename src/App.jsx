@@ -13,8 +13,15 @@ import VQBook from "./components/VQBook";
  * - 전역 상태 관리
  */
 function App() {
-  // 현재 선택된 책 상태 (기본값: friender)
-  const [selectedBook, setSelectedBook] = useState("friender");
+  // URL 쿼리 파라미터에서 책 타입을 읽어오거나 기본값 사용
+  const getInitialBookType = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookType = urlParams.get('book');
+    return bookType === 'vq' ? 'vq' : 'friender';
+  };
+
+  // 현재 선택된 책 상태
+  const [selectedBook, setSelectedBook] = useState(getInitialBookType());
 
   /**
    * 책 변경 핸들러
@@ -23,15 +30,22 @@ function App() {
    */
   const handleBookChange = (bookType) => {
     setSelectedBook(bookType);
+    
+    // URL 쿼리 파라미터 업데이트
+    const url = new URL(window.location);
+    url.searchParams.set('book', bookType);
+    window.history.pushState({}, '', url);
   };
 
   return (
     <div className="w-full h-full flex flex-col">
-      {/* 헤더 컴포넌트 */}
-      <Header selectedBook={selectedBook} onBookChange={handleBookChange} />
+      {/* 헤더 컴포넌트 - 스크롤할 때 따라다님 */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-[#0e1a26] border-b border-gray-700">
+        <Header selectedBook={selectedBook} onBookChange={handleBookChange} />
+      </div>
       
       {/* 메인 콘텐츠 영역 */}
-      <div className="flex-1 flex justify-center items-center p-2.5">
+      <div className="flex-1 flex justify-center items-center p-2.5 pt-24">
         {/* 선택된 책에 따라 적절한 플립북 컴포넌트 렌더링 */}
         {selectedBook === "friender" ? <Book /> : <VQBook />}
       </div>

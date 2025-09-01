@@ -624,7 +624,7 @@ function Book() {
 
   // 해상도 확인하여 크기 지정
   const bookWidth = isMobile ? 300 : 350;
-  const bookHeight = isMobile ? 400 : 450;
+  const bookHeight = isMobile ? 440 : 510;
 
   /**
    * 반응형 이미지 크기 계산 함수
@@ -813,9 +813,223 @@ function Book() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center">
+    <div className={`w-full ${isMobile ? 'h-auto min-h-screen' : 'h-full'} flex flex-col ${isMobile ? 'justify-start' : 'justify-center'} items-center`}>
       {/* 플립북 컨테이너 */}
-      <div className="flex justify-center items-center perspective-1000">
+      <div className={`${isMobile ? 'w-full' : 'flex justify-center items-center perspective-1000'}`}>
+        {isMobile ? (
+          // 모바일: 세로 스크롤로 페이지를 차례대로 표시
+          <div className="w-full space-y-0 py-0 pb-20 overflow-y-auto">
+            {/* 표지 페이지 */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden" style={{ height: isMobile ? 'auto' : '440px' }}>
+              <div className="w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative">
+                {/* 배경 이미지 */}
+                <img
+                  src="/Pdf-img/Friender/1.jpg"
+                  alt="Friender Cover Background"
+                  className="w-full h-full object-cover"
+                  style={{
+                    transform: `scale(${backgroundScale})`,
+                    filter: `blur(${backgroundBlur}px)`,
+                    transition: "transform 0.3s ease-out, filter 0.3s ease-out",
+                  }}
+                />
+
+                {/* main 이미지 오버레이 - 중앙에 배치 */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <img
+                    src="/interacivefile/FrienderFile/main.png"
+                    alt="Friender Main"
+                    style={{
+                      width: `${mainImageSize}px`,
+                      height: `${mainImageSize}px`,
+                      opacity: mainImageOpacity,
+                      transform: `rotate(${mainImageRotation}deg)`,
+                      objectFit: "contain",
+                      transition: "transform 0.1s linear",
+                    }}
+                  />
+
+                  {/* title과 subtitle - main 이미지 위에 오버레이 */}
+                  {isMainImageAnimating && mainImageSize > 50 && (
+                    <div
+                      className="absolute"
+                      style={{
+                        left: `${mainImageSize * 0.1}px`, // main 이미지 왼쪽에서 10% 위치
+                        bottom: `${mainImageSize * 0.1 + 50}px`, // main 이미지 아래에서 10% + 50px 위치
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: "10px",
+                      }}
+                    >
+                      {/* title */}
+                      <img
+                        src="/interacivefile/FrienderFile/title.png"
+                        alt="Friender Title"
+                        style={{
+                          width: `${mainImageSize * 0.8}px`, // main 이미지보다 20% 작게
+                          height: "auto",
+                          opacity: titleOpacity,
+                          transform: `translateY(${20 - titleOpacity * 20}px)`,
+                          transition:
+                            "opacity 0.3s ease-out, transform 0.3s ease-out",
+                        }}
+                      />
+
+                      {/* subtitle */}
+                      <img
+                        src="/interacivefile/FrienderFile/subtitle.png"
+                        alt="Friender Subtitle"
+                        style={{
+                          width: `${mainImageSize * 0.5}px`, // main 이미지의 50% 크기
+                          height: "auto",
+                          opacity: subtitleOpacity,
+                          transform: `translateY(${20 - subtitleOpacity * 20}px)`,
+                          transition:
+                            "opacity 0.3s ease-out, transform 0.3s ease-out",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* 페이지 그림자 효과 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
+              </div>
+            </div>
+
+            {/* 내부 페이지들 */}
+            {frienderData.map((page, index) => (
+              <div
+                key={page.id}
+                className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative"
+                style={{ height: isMobile ? 'auto' : '440px' }}
+              >
+                <div className="w-full h-full flex flex-col justify-center items-center p-0">
+                  <div className="w-full h-full relative">
+                    {/* 페이지 배경 이미지 */}
+                    <img
+                      src={`/Pdf-img/Friender/${page.id}.jpg`}
+                      alt={page.name}
+                      className="w-full h-full object-cover pointer-events-none"
+                    />
+
+                    {/* 각 페이지별 section-img 이미지들을 개별적으로 배치 */}
+                    {sectionImgMapping[page.id] &&
+                      individualImagePositions[page.id] && (
+                        <>
+                          {sectionImgMapping[page.id].map((imgSrc, imgIndex) => {
+                            const imagePosition = individualImagePositions[page.id]?.[imgIndex];
+                            
+                            // 이미지 위치 설정이 없는 경우 렌더링하지 않음
+                            if (!imagePosition) {
+                              return null;
+                            }
+                            
+                            return (
+                              <div
+                                key={imgIndex}
+                                className="absolute cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
+                                style={getResponsiveImagePosition(
+                                  imagePosition,
+                                  isMobile
+                                )}
+                                onClick={(e) =>
+                                  handleSectionImgClick(imgSrc, e, page.id)
+                                }
+                              >
+                                <img
+                                  src={imgSrc}
+                                  alt={`Section ${page.id}-${imgIndex + 1}`}
+                                  className="w-full h-full object-contain opacity-0 hover:opacity-100 transition-opacity duration-300"
+                                />
+                              </div>
+                            );
+                          })}
+                        </>
+                      )}
+
+                    {/* 4페이지(index === 2)에만 기존 environ 이미지들도 추가로 배치 */}
+                    {index === 2 && (
+                      <div
+                        className="absolute flex justify-between items-center pointer-events-auto"
+                        style={{
+                          top: "13%",
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          width: "85%",
+                        }}
+                      >
+                        <img
+                          src="/interacivefile/FrienderFile/environ-1.png"
+                          alt="Environment 1"
+                          className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                          onClick={(e) => handleGifClick(1, e)}
+                        />
+                        <img
+                          src="/interacivefile/FrienderFile/environ-2.png"
+                          alt="Environment 2"
+                          className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                          onClick={(e) => handleGifClick(2, e)}
+                        />
+                        <img
+                          src="/interacivefile/FrienderFile/environ-3.png"
+                          alt="Environment 3"
+                          className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                          onClick={(e) => handleGifClick(3, e)}
+                        />
+                        <img
+                          src="/interacivefile/FrienderFile/environ-4.png"
+                          alt="Environment 4"
+                          className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                          onClick={(e) => handleGifClick(4, e)}
+                        />
+                        <img
+                          src="/interacivefile/FrienderFile/environ-5.png"
+                          alt="Environment 5"
+                          className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                          onClick={(e) => handleGifClick(5, e)}
+                        />
+                        <img
+                          src="/interacivefile/FrienderFile/environ-6.png"
+                          alt="Environment 6"
+                          className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                          onClick={(e) => handleGifClick(6, e)}
+                        />
+                      </div>
+                    )}
+
+                    {/* 5페이지(index === 3)에만 비디오 추가 */}
+                    {index === 3 && (
+                      <div
+                        className="absolute flex justify-center items-center"
+                        style={{
+                          top: "10%",
+                          left: "47%",
+                          transform: "translateX(-50%)",
+                          width: "90%",
+                        }}
+                      >
+                        <video
+                          src="/interacivefile/FrienderFile/BlockCoding-VR.mp4"
+                          className="w-[200px] h-[100px] object-contain cursor-pointer hover:scale-105 transition-transform duration-300"
+                          controls
+                          muted
+                          loop
+                          autoPlay={false}
+                        />
+                      </div>
+                    )}
+
+                    {/* 페이지 그림자 효과 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // 데스크톱: 기존 HTMLFlipBook 사용
         <HTMLFlipBook
           ref={bookRef}
           width={bookWidth}
@@ -1043,9 +1257,11 @@ function Book() {
             </div>
           ))}
         </HTMLFlipBook>
+        )}
       </div>
 
-      {/* 네비게이션 */}
+      {/* 네비게이션 - 모바일에서는 숨김 */}
+      {!isMobile && (
       <div className="flex flex-col items-center gap-4 mt-6">
         {/* 페이지 그룹 네비게이션과 이전/다음 버튼을 한 줄에 배치 */}
         <div className="flex items-center gap-3">
@@ -1064,28 +1280,6 @@ function Book() {
           >
             ◀ 이전
           </button>
-          
-          {/* 페이지 그룹 네비게이션 */}
-          {/* <div className="flex justify-center gap-2 flex-wrap">
-            {getPageGroups().map((group) => {
-              const currentGroup = getCurrentGroup(currentPage);
-              const isActive = currentGroup.groupId === group.groupId;
-              return (
-                <button
-                  key={group.groupId}
-                  onClick={() => goToGroup(group.groupId)}
-                  className={`px-3 py-2 rounded-full text-sm font-medium transition-all duration-300 hover:scale-105 shadow-lg ${
-                    isActive
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                  title={`${group.description} (페이지 ${group.pages.map(p => p + 1).join(', ')})`}
-                >
-                  {group.groupId}
-                </button>
-              );
-            })}
-          </div> */}
           
           {/* 다음 그룹 버튼 */}
           <button
@@ -1111,11 +1305,76 @@ function Book() {
           </div>
         </div>
       </div>
+      )}
       
-      {/* Book 준비 상태 표시 */}
-      {!isBookReady && (
+      {/* Book 준비 상태 표시 - 모바일에서는 숨김 */}
+      {!isMobile && !isBookReady && (
         <div className="mt-2 text-white text-sm opacity-75">
           책을 불러오는 중... 잠시만 기다려주세요.
+        </div>
+      )}
+
+      {/* 모바일 하단 기능 버튼 */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-[#0e1a26] border-t border-gray-700 p-4 z-40">
+          <div className="flex justify-around items-center max-w-md mx-auto">
+            {/* Friender 버튼 */}
+            <button 
+              onClick={() => {
+                // Friender로 전환 (현재 페이지)
+                window.location.href = '/?book=friender';
+              }} 
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <span className="text-sm font-medium">Friender</span>
+            </button>
+            
+            {/* VQ 버튼 */}
+            <button 
+              onClick={() => {
+                // VQ로 전환
+                window.location.href = '/?book=vq';
+              }} 
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <span className="text-sm font-medium">VQ</span>
+            </button>
+            
+            {/* PDF 다운로드 버튼 */}
+            <button 
+              onClick={() => {
+                const link = document.createElement("a");
+                link.href = "/func-file/FrienderFile/프랜더-소개-책자.pdf";
+                link.download = "프랜더-소개-책자.pdf";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+            
+            {/* 프린트 버튼 */}
+            <button 
+              onClick={() => {
+                const pdfUrl = "/func-file/FrienderFile/프랜더-소개-책자.pdf";
+                const pdfWindow = window.open(pdfUrl, "_blank");
+                if (pdfWindow) {
+                  pdfWindow.onload = () => {
+                    pdfWindow.print();
+                  };
+                }
+              }}
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 

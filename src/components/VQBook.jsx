@@ -910,10 +910,102 @@ function VQBook() {
   };
 
   return (
-    <div className="w-full h-full flex flex-col justify-center items-center">
+    <div className={`w-full ${isMobile ? 'h-auto min-h-screen' : 'h-full'} flex flex-col ${isMobile ? 'justify-start' : 'justify-center'} items-center`}>
       {/* 플립북 컨테이너 */}
-      <div className="flex justify-center items-center perspective-1000">
-        <HTMLFlipBook
+      <div className={`${isMobile ? 'w-full' : 'flex justify-center items-center perspective-1000'}`}>
+        {isMobile ? (
+          // 모바일: 세로 스크롤로 페이지를 차례대로 표시
+          <div className="w-full space-y-0 py-0 pb-20 overflow-y-auto">
+            {/* 표지 페이지 */}
+            <div className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative overflow-hidden" style={{ height: isMobile ? 'auto' : '450px' }}>
+              <div className="w-full h-full flex flex-col justify-center items-center p-0 text-center bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold relative">
+                {/* 배경 이미지 */}
+                <img
+                  src="/Pdf-img/VQ/1.png"
+                  alt="VQ Cover Background"
+                  className="w-full h-full object-cover"
+                />
+
+                {/* 페이지 그림자 효과 */}
+                <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
+              </div>
+            </div>
+
+            {/* 내부 페이지들 */}
+            {vqData.map((page, index) => (
+              <div
+                key={page.id}
+                className="bg-gradient-to-br from-white to-gray-50 rounded shadow-lg relative"
+                style={{ height: isMobile ? 'auto' : '450px' }}
+              >
+                <div className="w-full h-full flex flex-col justify-center items-center p-0">
+                  <div className="w-full h-full relative">
+                    {/* 페이지 배경 이미지 */}
+                    <img
+                      src={`/Pdf-img/VQ/${page.id}.png`}
+                      alt={page.name}
+                      className="w-full h-full object-cover pointer-events-none"
+                    />
+
+                    {/* 각 페이지별 section-img 이미지들을 개별적으로 배치 */}
+                    {vqSectionImgMapping[page.id] &&
+                      vqIndividualImagePositions[page.id] && (
+                        <>
+                          {vqSectionImgMapping[page.id].map(
+                            (mediaSrc, imgIndex) => {
+                              const isVideo = mediaSrc.endsWith(".mp4");
+                              const imagePosition = vqIndividualImagePositions[page.id]?.[imgIndex];
+                              
+                              // 이미지 위치 설정이 없는 경우 렌더링하지 않음
+                              if (!imagePosition) {
+                                return null;
+                              }
+                              
+                              return (
+                                <div
+                                  key={imgIndex}
+                                  className="absolute cursor-pointer hover:scale-105 transition-all duration-300 border-2 border-transparent hover:border-blue-500 rounded-lg pointer-events-auto bg-transparent"
+                                  style={getResponsiveImagePosition(
+                                    imagePosition,
+                                    isMobile
+                                  )}
+                                  onClick={(e) =>
+                                    handleSectionImgClick(mediaSrc, e, page.id)
+                                  }
+                                >
+                                  {isVideo ? (
+                                    <video
+                                      src={mediaSrc}
+                                      className="w-full h-full rounded-lg object-contain opacity-100 cursor-pointer hover:scale-105 transition-transform duration-300"
+                                      controls
+                                      muted
+                                      loop
+                                      autoPlay={false}
+                                    />
+                                  ) : (
+                                    <img
+                                      src={mediaSrc}
+                                      alt={`Section ${page.id}-${imgIndex + 1}`}
+                                      className="w-full h-full object-contain opacity-0 hover:opacity-100 transition-opacity duration-300"
+                                    />
+                                  )}
+                                </div>
+                              );
+                            }
+                          )}
+                        </>
+                      )}
+
+                    {/* 페이지 그림자 효과 */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent pointer-events-none"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // 데스크톱: 기존 HTMLFlipBook 사용
+          <HTMLFlipBook
           ref={bookRef}
           width={bookWidth}
           height={bookHeight}
@@ -1018,79 +1110,140 @@ function VQBook() {
             </div>
           ))}
         </HTMLFlipBook>
-      </div>
+      )}
+    </div>
 
-      {/* 네비게이션 */}
-      <div className="flex flex-col items-center gap-4 mt-6">
-        {/* 페이지 그룹 네비게이션 */}
-        {/* <div className="flex justify-center gap-2 flex-wrap max-w-4xl">
-          {getPageGroups().map((group) => {
-            const currentGroup = getCurrentGroup(currentPage);
-            const isActive = currentGroup.groupId === group.groupId;
-            return (
-              <button
-                key={group.groupId}
-                onClick={() => goToGroup(group.groupId)}
-                className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 hover:scale-105 shadow-lg ${
-                  isActive
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-white text-gray-700 hover:bg-gray-100'
-                }`}
-                title={`${group.description} (페이지 ${group.pages.map(p => p + 1).join(', ')})`}
-              >
-                {group.groupId}
-              </button>
-            );
-          })}
-        </div> */}
-        
-        {/* 현재 그룹 정보 표시 */}
-        <div className="text-white text-center">
-          {/* <div className="text-lg font-bold mb-1">
-            {getCurrentGroup(currentPage).description}
+    {/* 네비게이션 - 모바일에서는 숨김 */}
+    {!isMobile && (
+        <div className="flex flex-col items-center gap-4 mt-6">
+          {/* 페이지 그룹 네비게이션 */}
+          {/* <div className="flex justify-center gap-2 flex-wrap max-w-4xl">
+            {getPageGroups().map((group) => {
+              const currentGroup = getCurrentGroup(currentPage);
+              const isActive = currentGroup.groupId === group.groupId;
+              return (
+                <button
+                  key={group.groupId}
+                  onClick={() => goToGroup(group.groupId)}
+                  className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-300 hover:scale-105 shadow-lg ${
+                    isActive
+                      ? 'bg-blue-500 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100'
+                  }`}
+                  title={`${group.description} (페이지 ${group.pages.map(p => p + 1).join(', ')})`}
+                >
+                  {group.groupId}
+                </button>
+              );
+            })}
           </div> */}
-          <div className="text-sm opacity-75">
-            페이지 {currentPage + 1} / 25
+          
+          {/* 현재 그룹 정보 표시 */}
+          <div className="text-white text-center">
+            {/* <div className="text-lg font-bold mb-1">
+              {getCurrentGroup(currentPage).description}
+            </div> */}
+            <div className="text-sm opacity-75">
+              페이지 {currentPage + 1} / 25
+            </div>
+          </div>
+          
+          {/* 이전/다음 그룹 버튼 */}
+          <div className="flex justify-center gap-5">
+            <button
+              onClick={() => {
+                const currentPageGroups = getPageGroups();
+                const currentGroup = getCurrentGroup(currentPage);
+                const prevGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId - 1);
+                if (prevGroup) {
+                  goToGroup(prevGroup.groupId);
+                }
+              }}
+              disabled={getCurrentGroup(currentPage).groupId === 1}
+              className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              ◀ 이전
+            </button>
+            <button
+              onClick={() => {
+                const currentPageGroups = getPageGroups();
+                const currentGroup = getCurrentGroup(currentPage);
+                const nextGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId + 1);
+                if (nextGroup) {
+                  goToGroup(nextGroup.groupId);
+                }
+              }}
+              disabled={getCurrentGroup(currentPage).groupId === getPageGroups().length}
+              className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-100 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              다음 ▶
+            </button>
           </div>
         </div>
-        
-        {/* 이전/다음 그룹 버튼 */}
-        <div className="flex justify-center gap-5">
-          <button
-            onClick={() => {
-              const currentPageGroups = getPageGroups();
-              const currentGroup = getCurrentGroup(currentPage);
-              const prevGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId - 1);
-              if (prevGroup) {
-                goToGroup(prevGroup.groupId);
-              }
-            }}
-            disabled={getCurrentGroup(currentPage).groupId === 1}
-            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            ◀ 이전
-          </button>
-          <button
-            onClick={() => {
-              const currentPageGroups = getPageGroups();
-              const currentGroup = getCurrentGroup(currentPage);
-              const nextGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId + 1);
-              if (nextGroup) {
-                goToGroup(nextGroup.groupId);
-              }
-            }}
-            disabled={getCurrentGroup(currentPage).groupId === getPageGroups().length}
-            className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-100 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-          >
-            다음 ▶
-          </button>
-        </div>
-      </div>
-      
-      {/* Book 준비 상태 표시 */}
-      {!isBookReady && (
-        <div className="mt-2 text-white text-sm opacity-75">
-          책을 불러오는 중... 잠시만 기다려주세요.
+      )}
+    
+
+      {/* 모바일 하단 기능 버튼 */}
+      {isMobile && (
+        <div className="fixed bottom-0 left-0 right-0 bg-[#0e1a26] border-t border-gray-700 p-4 z-40">
+          <div className="flex justify-around items-center max-w-md mx-auto">
+            {/* Friender 버튼 */}
+            <button 
+              onClick={() => {
+                // Friender로 전환
+                window.location.href = '/?book=friender';
+              }} 
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <span className="text-sm font-medium">Friender</span>
+            </button>
+            
+            {/* VQ 버튼 */}
+            <button 
+              onClick={() => {
+                // VQ로 전환 (현재 페이지)
+                window.location.href = '/?book=vq';
+              }} 
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <span className="text-sm font-medium">VQ</span>
+            </button>
+            
+            {/* PDF 다운로드 버튼 */}
+            <button 
+              onClick={() => {
+                const link = document.createElement("a");
+                link.href = "/func-file/VQFile/(주)브이큐스튜디오_소개 카달로그.pdf";
+                link.download = "(주)브이큐스튜디오_소개 카달로그.pdf";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+              }}
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </button>
+            
+            {/* 프린트 버튼 */}
+            <button 
+              onClick={() => {
+                const pdfUrl = "/func-file/VQFile/(주)브이큐스튜디오_소개 카달로그.pdf";
+                const pdfWindow = window.open(pdfUrl, "_blank");
+                if (pdfWindow) {
+                  pdfWindow.onload = () => {
+                    pdfWindow.print();
+                  };
+                }
+              }}
+              className="flex flex-col items-center gap-1 text-white hover:text-blue-400 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+              </svg>
+            </button>
+          </div>
         </div>
       )}
 
