@@ -39,13 +39,11 @@ function App() {
 
   return (
     <div className="w-full min-h-screen bg-[#0e1a26]">
-      {/* 헤더 컴포넌트 - 스크롤할 때 따라다님 */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-[#0e1a26] border-b border-gray-700">
-        <Header selectedBook={selectedBook} onBookChange={handleBookChange} />
-      </div>
+      {/* 헤더 컴포넌트 */}
+      <Header selectedBook={selectedBook} onBookChange={handleBookChange} />
       
       {/* 메인 콘텐츠 영역 */}
-      <div className="pt-20">
+      <div className="flex-1">
         {/* 선택된 책에 따라 적절한 플립북 컴포넌트 렌더링 */}
         {selectedBook === "friender" ? <Book /> : <VQBook />}
       </div>

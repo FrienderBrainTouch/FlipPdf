@@ -99,19 +99,95 @@ function Book() {
         setBackgroundBlur(5 * bgProgress);
       }
 
+      // 메인 이미지 등장 애니메이션 (20-50%) - 주석 처리
+      /*
+      if (progress >= 0.2 && progress <= 0.5) {
+        const imgProgress = (progress - 0.2) / 0.3;
+        setMainImageOpacity(imgProgress);
+        setMainImageRotation(360 * imgProgress);
+        
+        // 표지 페이지 실제 공간의 70%로 목표 크기 계산
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const aspectRatio = 3072 / 2136; // 높이/너비 비율
+        
+        // 표지 페이지의 실제 높이와 너비 계산
+        let coverHeight, coverWidth;
+        if (viewportWidth * aspectRatio <= viewportHeight) {
+          // 너비가 제한 요소인 경우
+          coverWidth = viewportWidth;
+          coverHeight = viewportWidth * aspectRatio;
+        } else {
+          // 높이가 제한 요소인 경우
+          coverHeight = viewportHeight;
+          coverWidth = viewportHeight / aspectRatio;
+        }
+        
+        // 가로 70%, 세로 70% 크기로 목표 크기 설정
+        const targetWidth = coverWidth * 0.7;
+        const targetHeight = coverHeight * 0.7;
+        const targetSize = Math.min(targetWidth, targetHeight); // 정사각형 이미지이므로 작은 값 사용
+        
+        // 0에서 목표 크기까지 애니메이션
+        setMainImageSize(0 + targetSize * imgProgress);
+      }
+
+      // 메인 이미지 크기 조정 및 회전 정리 (50-80%) - 주석 처리
+      if (progress >= 0.5 && progress <= 0.8) {
+        const sizeProgress = (progress - 0.5) / 0.3;
+        
+        // 표지 페이지 실제 공간의 70%로 목표 크기 설정
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        const aspectRatio = 3072 / 2136; // 높이/너비 비율
+        
+        // 표지 페이지의 실제 높이와 너비 계산
+        let coverHeight, coverWidth;
+        if (viewportWidth * aspectRatio <= viewportHeight) {
+          // 너비가 제한 요소인 경우
+          coverWidth = viewportWidth;
+          coverHeight = viewportWidth * aspectRatio;
+        } else {
+          // 높이가 제한 요소인 경우
+          coverHeight = viewportHeight;
+          coverWidth = viewportHeight / aspectRatio;
+        }
+        
+        // 가로 70%, 세로 70% 크기로 목표 크기 설정
+        const targetWidth = coverWidth * 0.7;
+        const targetHeight = coverHeight * 0.7;
+        const targetSize = Math.min(targetWidth, targetHeight); // 정사각형 이미지이므로 작은 값 사용
+        
+        // 목표 크기 유지
+        setMainImageSize(targetSize);
+        setMainImageRotation(360 - 360 * sizeProgress); // 360도에서 0도로 회전 정리
+      }
+      */
+      
       // 메인 이미지 등장 애니메이션 (20-50%)
       if (progress >= 0.2 && progress <= 0.5) {
         const imgProgress = (progress - 0.2) / 0.3;
         setMainImageOpacity(imgProgress);
         setMainImageRotation(360 * imgProgress);
-        setMainImageSize(1 + 319 * imgProgress);
+        
+        // 0에서 70%까지 크기 애니메이션
+        setMainImageSize(0 + 70 * imgProgress);
       }
 
       // 메인 이미지 크기 조정 및 회전 정리 (50-80%)
       if (progress >= 0.5 && progress <= 0.8) {
         const sizeProgress = (progress - 0.5) / 0.3;
-        setMainImageSize(320 + 0 * sizeProgress); // 크기 유지
+        
+        // 70% 크기 유지
+        setMainImageSize(70);
         setMainImageRotation(360 - 360 * sizeProgress); // 360도에서 0도로 회전 정리
+      }
+
+      // 메인 이미지 최종 상태 설정 (80% 이후)
+      if (progress >= 0.8) {
+        setMainImageSize(70);
+        setMainImageOpacity(1);
+        setMainImageRotation(0);
       }
 
       // 타이틀과 서브타이틀 등장 (70-100%)
@@ -370,7 +446,7 @@ function Book() {
         top: "3%",
         left: "5%",
         width: "100%",
-        maxWidth: "345px",
+        maxWidth: "95%",
       },
       {
         // 2-2번 이미지 - 중단
@@ -378,7 +454,7 @@ function Book() {
         top: "25%",
         left: "3%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 2-3번 이미지 - 하단
@@ -386,7 +462,7 @@ function Book() {
         bottom: "0%",
         right: "0%",
         width: "100%",
-        maxWidth: "355px",
+        maxWidth: "95%",
       },
     ],
     3: [
@@ -396,7 +472,7 @@ function Book() {
         top: "7%",
         left: "2%",
         width: "100%",
-        maxWidth: "353px",
+        maxWidth: "95%",
       },
       {
         // 3-2번 이미지 - 상단 오른쪽
@@ -404,7 +480,7 @@ function Book() {
         top: "38%",
         right: "2%",
         width: "100%",
-        maxWidth: "354px",
+        maxWidth: "95%",
       },
       {
         // 3-3번 이미지 - 하단 중앙
@@ -412,7 +488,7 @@ function Book() {
         bottom: "0%",
         left: "3%",
         width: "100%",
-        maxWidth: "351px",
+        maxWidth: "95%",
       },
     ],
     4: [
@@ -422,7 +498,7 @@ function Book() {
         top: "0%",
         left: "7%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 4-2번 이미지 - 상단 오른쪽
@@ -430,7 +506,7 @@ function Book() {
         top: "22%",
         right: "2%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 4-3번 이미지 - 하단 왼쪽
@@ -438,7 +514,7 @@ function Book() {
         bottom: "39%",
         left: "7%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 4-4번 이미지 - 하단 오른쪽
@@ -446,7 +522,7 @@ function Book() {
         bottom: "3%",
         right: "0%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
     ],
     5: [
@@ -456,7 +532,7 @@ function Book() {
         top: "0%",
         left: "0%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 5-2번 이미지 - 중단 왼쪽
@@ -464,7 +540,7 @@ function Book() {
         top: "33%",
         left: "0%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 5-3번 이미지 - 중단 오른쪽
@@ -472,7 +548,7 @@ function Book() {
         bottom: "3%",
         right: "10%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
     ],
     6: [
@@ -482,7 +558,7 @@ function Book() {
         top: "0%",
         left: "9%",
         width: "100%",
-        maxWidth: "305px",
+        maxWidth: "95%",
       },
       {
         // 6-2번 이미지 - 중단 왼쪽
@@ -490,7 +566,7 @@ function Book() {
         top: "12%",
         left: "6%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 6-3번 이미지 - 중단 오른쪽
@@ -498,7 +574,7 @@ function Book() {
         bottom: "27%",
         right: "0%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 6-4번 이미지 - 하단
@@ -506,7 +582,7 @@ function Book() {
         bottom: "3%",
         left: "7%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
     ],
     7: [
@@ -516,7 +592,7 @@ function Book() {
         top: "0%",
         left: "0%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 7-2번 이미지 - 상단 오른쪽
@@ -524,7 +600,7 @@ function Book() {
         top: "11%",
         right: "8%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 7-3번 이미지 - 하단 왼쪽
@@ -532,7 +608,7 @@ function Book() {
         bottom: "39%",
         left: "0%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
       {
         // 7-4번 이미지 - 하단 오른쪽
@@ -540,7 +616,7 @@ function Book() {
         bottom: "4%",
         right: "7%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
     ],
     8: [
@@ -550,7 +626,7 @@ function Book() {
         bottom: "1%",
         left: "0%",
         width: "100%",
-        maxWidth: "340px",
+        maxWidth: "95%",
       },
     ],
   };
@@ -657,13 +733,24 @@ function Book() {
     }
 
     const scale = isMobile ? 0.9 : 1;
+    
+    // maxWidth가 퍼센트인지 픽셀인지 판단
+    let maxWidthValue;
+    if (typeof baseConfig.maxWidth === 'string' && baseConfig.maxWidth.includes('%')) {
+      // 퍼센트 값인 경우 그대로 유지
+      maxWidthValue = baseConfig.maxWidth;
+    } else {
+      // 픽셀 값인 경우에만 변환
+      maxWidthValue = `${getResponsiveImageSize(
+        parseInt(baseConfig.maxWidth || 200),
+        isMobile
+      )}px`;
+    }
+    
     return {
       ...baseConfig,
       width: `${parseFloat(baseConfig.width || 100) * scale}%`,
-      maxWidth: `${getResponsiveImageSize(
-        parseInt(baseConfig.maxWidth || 200),
-        isMobile
-      )}px`,
+      maxWidth: maxWidthValue,
     };
   };
 
@@ -814,11 +901,11 @@ function Book() {
   };
 
   return (
-    <div className="w-full flex flex-col justify-start items-center">
+    <div className="w-full flex flex-col justify-start items-center min-h-screen">
       {/* 플립북 컨테이너 */}
-      <div className="w-full">
+      <div className="w-full flex-1">
         {/* 모든 해상도에서 세로 스크롤로 페이지를 차례대로 표시 */}
-        <div className="w-full space-y-0 py-0 pb-20">
+        <div className="w-full space-y-0 py-8 pb-32">
           {/* 표지 페이지 */}
           <div className="relative overflow-hidden bg-white" style={{ 
             width: '100%', 
@@ -842,62 +929,64 @@ function Book() {
               />
 
               {/* main 이미지 오버레이 - 중앙에 배치 */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <img
-                  src="/interacivefile/FrienderFile/main.png"
-                  alt="Friender Main"
-                  style={{
-                    width: `${mainImageSize}px`,
-                    height: `${mainImageSize}px`,
-                    opacity: mainImageOpacity,
-                    transform: `rotate(${mainImageRotation}deg)`,
-                    objectFit: "contain",
-                    transition: "transform 0.1s linear",
-                  }}
-                />
-
-                {/* title과 subtitle - main 이미지 위에 오버레이 */}
-                {isMainImageAnimating && mainImageSize > 50 && (
-                  <div
-                    className="absolute"
+              <div className="absolute inset-0 ">
+                {/* relative div 추가 - 메인 이미지와 title, subtitle을 포함 */}
+                <div className="relative flex items-center justify-center w-full h-full">
+                  {/* 메인 이미지 */}
+                  <img
+                    src="/interacivefile/FrienderFile/main.png"
+                    alt="Friender Main"
                     style={{
-                      left: `${mainImageSize * 0.1}px`, // main 이미지 왼쪽에서 10% 위치
-                      bottom: `${mainImageSize * 0.1 + 50}px`, // main 이미지 아래에서 10% + 50px 위치
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      gap: "10px",
+                      width: `${mainImageSize}%`,
+                      height: `${mainImageSize}%`,
+                      opacity: mainImageOpacity,
+                      transform: `rotate(${mainImageRotation}deg)`,
+                      objectFit: "contain",
+                      transition: "transform 0.1s linear",
                     }}
-                  >
-                    {/* title */}
-                    <img
-                      src="/interacivefile/FrienderFile/title.png"
-                      alt="Friender Title"
-                      style={{
-                        width: `${mainImageSize * 0.8}px`, // main 이미지보다 20% 작게
-                        height: "auto",
-                        opacity: titleOpacity,
-                        transform: `translateY(${20 - titleOpacity * 20}px)`,
-                        transition:
-                          "opacity 0.3s ease-out, transform 0.3s ease-out",
-                      }}
-                    />
+                  />
 
-                    {/* subtitle */}
-                    <img
-                      src="/interacivefile/FrienderFile/subtitle.png"
-                      alt="Friender Subtitle"
+                  {/* title과 subtitle - 하나의 div로 묶어서 absolute로 배치 */}
+                  {isMainImageAnimating && mainImageSize > 50 && (
+                    <div
+                      className="absolute"
                       style={{
-                        width: `${mainImageSize * 0.5}px`, // main 이미지의 50% 크기
-                        height: "auto",
-                        opacity: subtitleOpacity,
-                        transform: `translateY(${20 - subtitleOpacity * 20}px)`,
-                        transition:
-                          "opacity 0.3s ease-out, transform 0.3s ease-out",
+                        left: `13%`, // 메인 이미지 왼쪽에서 13% 위치
+                        bottom: `23%`, // 메인 이미지 아래에서 23% 위치
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
+                        gap: "10px",
                       }}
-                    />
-                  </div>
-                )}
+                    >
+                      {/* title */}
+                      <img
+                        src="/interacivefile/FrienderFile/title.png"
+                        alt="Friender Title"
+                        style={{
+                          width: `${mainImageSize * 0.9}%`, // 메인 이미지보다 20% 작게
+                          height: "auto",
+                          opacity: titleOpacity,
+                          transform: `translateY(${20 - titleOpacity * 20}px)`,
+                          transition: "opacity 0.3s ease-out, transform 0.3s ease-out",
+                        }}
+                      />
+
+                      {/* subtitle */}
+                      <img
+                        src="/interacivefile/FrienderFile/subtitle.png"
+                        alt="Friender Subtitle"
+                        style={{
+                          width: `${mainImageSize * 0.8}%`, // 메인 이미지의 50% 크기
+                          height: "auto",
+                          opacity: subtitleOpacity,
+                          transform: `translateY(${20 - subtitleOpacity * 20}px)`,
+                          transition: "opacity 0.3s ease-out, transform 0.3s ease-out",
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* 페이지 그림자 효과 */}
@@ -970,8 +1059,8 @@ function Book() {
                     <div
                       className="absolute flex justify-between items-center pointer-events-auto"
                       style={{
-                        top: "13%",
-                        left: "50%",
+                        top: "14%",
+                        left: "52%",
                         transform: "translateX(-50%)",
                         width: "85%",
                       }}
@@ -979,37 +1068,37 @@ function Book() {
                       <img
                         src="/interacivefile/FrienderFile/environ-1.png"
                         alt="Environment 1"
-                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 hover:opacity-100 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-all duration-300"
                         onClick={(e) => handleGifClick(1, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-2.png"
                         alt="Environment 2"
-                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 hover:opacity-100 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-all duration-300"
                         onClick={(e) => handleGifClick(2, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-3.png"
                         alt="Environment 3"
-                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 hover:opacity-100 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-all duration-300"
                         onClick={(e) => handleGifClick(3, e)}
-                      />
-                      <img
-                        src="/interacivefile/FrienderFile/environ-6.png"
-                        alt="Environment 6"
-                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
-                        onClick={(e) => handleGifClick(6, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-4.png"
                         alt="Environment 4"
-                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
-                        onClick={(e) => handleGifClick(4, e)}
+                        className="flex-1 opacity-0 hover:opacity-100 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-all duration-300"
+                        onClick={(e) => handleGifClick(6, e)}
                       />
                       <img
                         src="/interacivefile/FrienderFile/environ-5.png"
                         alt="Environment 5"
-                        className="flex-1 opacity-0 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-transform duration-300"
+                        className="flex-1 opacity-0 hover:opacity-100 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-all duration-300"
+                        onClick={(e) => handleGifClick(4, e)}
+                      />
+                      <img
+                        src="/interacivefile/FrienderFile/environ-6.png"
+                        alt="Environment 6"
+                        className="flex-1 opacity-0 hover:opacity-100 max-w-[calc(15%-2px)] h-auto object-contain cursor-pointer hover:scale-110 transition-all duration-300"
                         onClick={(e) => handleGifClick(5, e)}
                       />
                     </div>
@@ -1023,12 +1112,12 @@ function Book() {
                         top: "10%",
                         left: "47%",
                         transform: "translateX(-50%)",
-                        width: "90%",
+                        maxWidth: "90%",
                       }}
                     >
                       <video
                         src="/interacivefile/FrienderFile/BlockCoding-VR.mp4"
-                        className="w-[200px] h-[100px] object-contain cursor-pointer hover:scale-105 transition-transform duration-300"
+                        className="w-[50%] object-contain cursor-pointer hover:scale-105 transition-transform duration-300"
                         controls
                         muted
                         loop
@@ -1056,7 +1145,7 @@ function Book() {
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-2xl p-6 max-w-4xl max-h-[90vh] overflow-auto relative shadow-2xl"
+            className="bg-white rounded-2xl p-6 w-[90%] max-h-[90vh] overflow-auto relative shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* 닫기 버튼 */}
