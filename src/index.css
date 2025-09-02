@@ -15,43 +15,18 @@
 
 html,
 body {
-  height: 100dvh;
-  width: 100dvw;
+  height: 100%;
+  width: 100%;
   background: #0e1a26;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-/* 모바일에서 스크롤 허용 */
-@media (max-width: 768px) {
-  html,
-  body {
-    overflow: auto;
-    height: auto;
-    min-height: 100dvh;
-    display: block;
-  }
+  overflow: auto;
+  margin: 0;
+  padding: 0;
 }
 
 #root {
   width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-}
-
-/* 모바일에서 root 요소 스크롤 허용 */
-@media (max-width: 768px) {
-  #root {
-    height: auto;
-    min-height: 100dvh;
-    align-items: flex-start;
-    justify-content: flex-start;
-    padding: 0;
-  }
+  min-height: 100vh;
+  background: #0e1a26;
 }
 
 /* FlipBook 커스텀 스타일 */
@@ -142,10 +117,6 @@ button:hover {
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
-  #root {
-    padding: 0;
-  }
-  
   .perspective-1000 {
     perspective: 800px;
   }
