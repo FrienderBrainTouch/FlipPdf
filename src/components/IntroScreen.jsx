@@ -34,6 +34,99 @@ function IntroScreen() {
   // ref 변수들
   const animationRef = useRef(null);
 
+  /**
+   * 중앙 이미지 애니메이션 시작 함수
+   */
+  const startImageAnimation = () => {
+    const startTime = performance.now();
+    const duration = 2000; // 2초
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // ease-out 효과 적용
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      
+      // 이미지가 div 크기로 줄어들면서 나타남
+      setImageScale(1.2 - 0.2 * easeOut); // 120%에서 100%로 줄어듦
+      setImageOpacity(easeOut);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      } else {
+        // 중앙 이미지 애니메이션 완료 후 오버레이 애니메이션 시작
+        startOverlayAnimations();
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
+  /**
+   * 오버레이 애니메이션 시작 함수
+   */
+  const startOverlayAnimations = () => {
+    // 1. SampleTitle.png 왼쪽에서 나타남
+    setTimeout(() => {
+      animateOverlayFromLeft(setOverlay1Opacity, setOverlay1Transform, 1000);
+    }, 500);
+
+    // 2. SampleSubTitle.png 오른쪽에서 나타남
+    setTimeout(() => {
+      animateOverlayFromRight(setOverlay2Opacity, setOverlay2Transform, 1000);
+    }, 1500);
+
+    // 3. SampleTitle2.png 왼쪽에서 나타남
+    setTimeout(() => {
+      animateOverlayFromLeft(setOverlay3Opacity, setOverlay3Transform, 1000);
+    }, 2500);
+  };
+
+  /**
+   * 왼쪽에서 나타나는 오버레이 애니메이션 함수
+   */
+  const animateOverlayFromLeft = (setOpacity, setTransform, duration) => {
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setOpacity(easeOut);
+      setTransform(`translateX(${-100 + 100 * easeOut}%)`);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
+  /**
+   * 오른쪽에서 나타나는 오버레이 애니메이션 함수
+   */
+  const animateOverlayFromRight = (setOpacity, setTransform, duration) => {
+    const startTime = performance.now();
+
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      setOpacity(easeOut);
+      setTransform(`translateX(${100 - 100 * easeOut}%)`);
+
+      if (progress < 1) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+
+    animationRef.current = requestAnimationFrame(animate);
+  };
+
   // GIF 파일 매핑 (환경 관련 애니메이션)
   const gifMapping = {
     1: "/interacivefile/FrienderFile/1-탄소-중립을-통해-지구촌-기후변화를-예방.gif",
@@ -330,89 +423,6 @@ function IntroScreen() {
     };
 
     // 3단계: 중앙 이미지 애니메이션
-    const startImageAnimation = () => {
-      const startTime = performance.now();
-      const duration = 2000; // 2초
-
-      const animate = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        // ease-out 효과 적용
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        
-        // 이미지가 div 크기로 줄어들면서 나타남
-        setImageScale(1.2 - 0.2 * easeOut); // 120%에서 100%로 줄어듦
-        setImageOpacity(easeOut);
-
-        if (progress < 1) {
-          animationRef.current = requestAnimationFrame(animate);
-        } else {
-          // 중앙 이미지 애니메이션 완료 후 오버레이 애니메이션 시작
-          startOverlayAnimations();
-        }
-      };
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    // 오버레이 애니메이션 함수
-    const startOverlayAnimations = () => {
-      // 1. SampleTitle.png 왼쪽에서 나타남
-      setTimeout(() => {
-        animateOverlayFromLeft(setOverlay1Opacity, setOverlay1Transform, 1000);
-      }, 500);
-
-      // 2. SampleSubTitle.png 오른쪽에서 나타남
-      setTimeout(() => {
-        animateOverlayFromRight(setOverlay2Opacity, setOverlay2Transform, 1000);
-      }, 1500);
-
-      // 3. SampleTitle2.png 왼쪽에서 나타남
-      setTimeout(() => {
-        animateOverlayFromLeft(setOverlay3Opacity, setOverlay3Transform, 1000);
-      }, 2500);
-    };
-
-    // 왼쪽에서 나타나는 오버레이 애니메이션 함수
-    const animateOverlayFromLeft = (setOpacity, setTransform, duration) => {
-      const startTime = performance.now();
-
-      const animate = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        setOpacity(easeOut);
-        setTransform(`translateX(${-100 + 100 * easeOut}%)`);
-
-        if (progress < 1) {
-          animationRef.current = requestAnimationFrame(animate);
-        }
-      };
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
-
-    // 오른쪽에서 나타나는 오버레이 애니메이션 함수
-    const animateOverlayFromRight = (setOpacity, setTransform, duration) => {
-      const startTime = performance.now();
-
-      const animate = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        setOpacity(easeOut);
-        setTransform(`translateX(${100 - 100 * easeOut}%)`);
-
-        if (progress < 1) {
-          animationRef.current = requestAnimationFrame(animate);
-        }
-      };
-
-      animationRef.current = requestAnimationFrame(animate);
-    };
 
     // 애니메이션 시작
     setTimeout(() => {
@@ -432,7 +442,15 @@ function IntroScreen() {
    */
   const goToPreviousPage = () => {
     if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
+      const newPage = currentPage - 1;
+      setCurrentPage(newPage);
+      
+      // 표지 페이지(0번)로 돌아올 때 애니메이션 재실행
+      if (newPage === 0) {
+        setTimeout(() => {
+          resetAndRestartAnimation();
+        }, 300);
+      }
     }
   };
 
@@ -649,6 +667,31 @@ function IntroScreen() {
 
       logoAnimation();
     }, 500);
+  };
+
+  /**
+   * 표지 페이지로 돌아갈 때 애니메이션 상태 초기화 및 재실행
+   */
+  const resetAndRestartAnimation = () => {
+    // 애니메이션 상태 초기화
+    setImageScale(1.2);
+    setImageOpacity(0);
+    setOverlay1Opacity(0);
+    setOverlay1Transform('translateX(-100%)');
+    setOverlay2Opacity(0);
+    setOverlay2Transform('translateX(100%)');
+    setOverlay3Opacity(0);
+    setOverlay3Transform('translateX(-100%)');
+
+    // 기존 애니메이션 정리
+    if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+
+    // 애니메이션 재시작
+    setTimeout(() => {
+      startImageAnimation();
+    }, 100);
   };
 
   /**
