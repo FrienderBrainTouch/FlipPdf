@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Header from "./components/Header";
 import Book from "./components/Book";
 import VQBook from "./components/VQBook";
+import IntroScreen from "./components/IntroScreen";
 
 /**
  * 메인 애플리케이션 컴포넌트
@@ -17,6 +18,13 @@ function App() {
   const getInitialBookType = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const bookType = urlParams.get('book');
+    const intro = urlParams.get('intro');
+    
+    // intro 파라미터가 있으면 IntroScreen 표시
+    if (intro === 'true') {
+      return 'intro';
+    }
+    
     return bookType === 'vq' ? 'vq' : 'friender';
   };
 
@@ -36,6 +44,11 @@ function App() {
     url.searchParams.set('book', bookType);
     window.history.pushState({}, '', url);
   };
+
+  // IntroScreen인 경우 별도 렌더링
+  if (selectedBook === 'intro') {
+    return <IntroScreen />;
+  }
 
   return (
     <div className="w-full min-h-screen bg-[#0e1a26]">

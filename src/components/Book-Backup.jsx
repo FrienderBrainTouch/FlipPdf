@@ -1265,33 +1265,27 @@ function Book() {
       <div className="flex flex-col items-center gap-4 mt-6">
         {/* 페이지 그룹 네비게이션과 이전/다음 버튼을 한 줄에 배치 */}
         <div className="flex items-center gap-3">
-          {/* 이전 그룹 버튼 */}
+          {/* 이전 페이지 버튼 */}
           <button
             onClick={() => {
-              const currentPageGroups = getPageGroups();
-              const currentGroup = getCurrentGroup(currentPage);
-              const prevGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId - 1);
-              if (prevGroup) {
-                goToGroup(prevGroup.groupId);
+              if (currentPage > 0) {
+                safePageFlip(currentPage - 1);
               }
             }}
-            disabled={getCurrentGroup(currentPage).groupId === 1}
+            disabled={currentPage === 0}
             className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             ◀ 이전
           </button>
           
-          {/* 다음 그룹 버튼 */}
+          {/* 다음 페이지 버튼 */}
           <button
             onClick={() => {
-              const currentPageGroups = getPageGroups();
-              const currentGroup = getCurrentGroup(currentPage);
-              const nextGroup = currentPageGroups.find(g => g.groupId === currentGroup.groupId + 1);
-              if (nextGroup) {
-                goToGroup(nextGroup.groupId);
+              if (currentPage < 7) {
+                safePageFlip(currentPage + 1);
               }
             }}
-            disabled={getCurrentGroup(currentPage).groupId === getPageGroups().length}
+            disabled={currentPage === 7}
             className="px-4 py-2 bg-white text-gray-700 rounded-full hover:bg-gray-100 transition-all duration-300 hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             다음 ▶
