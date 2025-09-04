@@ -652,10 +652,16 @@ function IntroScreen() {
   };
 
   /**
-   * 프린터 버튼 클릭 핸들러
+   * 프린터 버튼 클릭 핸들러 - PDF를 열고 프린트
    */
   const handlePrintClick = () => {
-    window.print();
+    const pdfUrl = "/func-file/FrienderFile/프랜더-소개-책자.pdf";
+    const pdfWindow = window.open(pdfUrl, "_blank");
+    if (pdfWindow) {
+      pdfWindow.onload = () => {
+        pdfWindow.print();
+      };
+    }
   };
 
   /**
@@ -679,11 +685,27 @@ function IntroScreen() {
         title: 'Friender',
         text: 'Friender 프로젝트를 확인해보세요!',
         url: window.location.href,
+      }).then(() => {
+        // Web Share API 성공 후에도 클립보드에 복사
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          console.log('링크가 클립보드에 복사되었습니다!');
+        }).catch(() => {
+          console.log('클립보드 복사에 실패했습니다.');
+        });
+      }).catch(() => {
+        // Web Share API 실패 시 클립보드에 복사
+        navigator.clipboard.writeText(window.location.href).then(() => {
+          alert('링크가 클립보드에 복사되었습니다!');
+        }).catch(() => {
+          alert('클립보드 복사에 실패했습니다.');
+        });
       });
     } else {
       // Web Share API를 지원하지 않는 경우 클립보드에 복사
       navigator.clipboard.writeText(window.location.href).then(() => {
         alert('링크가 클립보드에 복사되었습니다!');
+      }).catch(() => {
+        alert('클립보드 복사에 실패했습니다.');
       });
     }
   };
